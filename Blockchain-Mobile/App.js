@@ -1,7 +1,28 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View, AsyncStorage } from 'react-native';
+var Block = require('./Blockchain.js')
+
+const Blockchain = new Block.Blockchain();
 
 export default class App extends React.Component {
+	componentWillMount() {
+
+		AsyncStorage.getItem('@Farell:blockchain', (error, value) => {
+			if (!error) {
+				if (value !== null) {
+					Blockchain = JSON.parse(value);
+					console.log("Available")
+				} else {
+					console.log("Not Available")
+					AsyncStorage.setItem('@Farell:blockchain', JSON.stringify(Blockchain));			
+				}
+			}
+			console.log(Blockchain)
+		});
+		
+	}
+	
+
   render() {
     return (
       <View style={styles.container}>
