@@ -1,44 +1,47 @@
 import React from 'react';
-import { StyleSheet, Text, View, AsyncStorage } from 'react-native';
-var Block = require('./Blockchain.js')
+import { StyleSheet, Text, View, AsyncStorage, Platform } from 'react-native';
+import { StackNavigator, TabNavigator } from 'react-navigation';
+import { getStatusBarHeight } from 'react-native-status-bar-height';
 
-const Blockchain = new Block.Blockchain();
+import LoginScreen from './components/LoginScreen.js';
+import HomeScreen from './components/main/HomeScreen.js';
+import TestScreen from './components/main/TestScreen.js';
+
+const MainRouter = TabNavigator({
+	Home: {
+		screen: HomeScreen,
+	},
+	Test: {
+		screen: TestScreen,
+	}
+}, {
+	tabBarOptions: {
+		style: {
+			//backgroundColor: '#41b8f4',
+		},
+		labelStyle: {
+			fontWeight: 'bold'
+		}
+	},
+})
+
+const RootRouter = StackNavigator({
+  	Login: {
+		screen: LoginScreen,
+	},
+	Main: {
+		screen: MainRouter,
+	}
+}, {
+	navigationOptions: {
+		headerStyle: {
+			height: 0
+		}
+	}
+})
 
 export default class App extends React.Component {
-	componentWillMount() {
-
-		AsyncStorage.getItem('@Farell:blockchain', (error, value) => {
-			if (!error) {
-				if (value !== null) {
-					Blockchain = JSON.parse(value);
-					console.log("Available")
-				} else {
-					console.log("Not Available")
-					AsyncStorage.setItem('@Farell:blockchain', JSON.stringify(Blockchain));			
-				}
-			}
-			console.log(Blockchain)
-		});
-		
+	render() {
+		return ( <RootRouter /> );
 	}
-	
-
-  render() {
-    return (
-      <View style={styles.container}>
-        <Text>Open up App.js to start working on your app!</Text>
-        <Text>Changes you make will automatically reload.</Text>
-        <Text>Shake your phone to open the developer menu.</Text>
-      </View>
-    );
-  }
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
