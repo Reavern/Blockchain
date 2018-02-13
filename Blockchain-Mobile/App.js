@@ -23,6 +23,7 @@ const MainRouter = TabNavigator({
 			fontWeight: 'bold'
 		}
 	},
+	//tabBarPosition: 'bottom'
 })
 
 const RootRouter = StackNavigator({

@@ -19,8 +19,18 @@ export default class App extends React.Component {
 			<View style={styles.container}>
 				<SectionList
 					sections={ data }
-					renderItem={({item}) => <Text>{item}</Text>}
-					renderSectionHeader={({section}) => <Text>{section.title}</Text>}
+					renderItem={ ({item}) => 
+							<Text
+								style={styles.sectionItem}>
+								{ item }
+							</Text>
+					}
+					renderSectionHeader={ ({section}) =>
+						<Text 
+							style={styles.sectionList}>
+							{section.title}
+						</Text>
+					}
 					keyExtractor={(item, index) => index}
 				/>
 			</View>
@@ -31,8 +41,27 @@ export default class App extends React.Component {
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
-		backgroundColor: '#fff',
-		alignItems: 'center',
-		justifyContent: 'center',
+		// backgroundColor: '#fff',
+		// alignItems: 'center',
+		// justifyContent: 'center',
 	},
+	sectionList: {
+		padding: 10,
+		height: 50,
+		fontSize: 20,
+		fontWeight: 'bold',
+		backgroundColor: '#fff',
+		//borderRadius: 4,
+		borderWidth: 0.5,
+		borderColor: '#000',
+	},
+	sectionItem: {
+		padding: 10,
+		height: 40,
+		fontSize: 18,
+		backgroundColor: 'lightgrey',
+		//borderRadius: 4,
+		borderWidth: 0.5,
+		borderColor: '#000',
+	}
 });

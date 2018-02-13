@@ -14,8 +14,6 @@ export default class App extends React.Component {
 		this.submitButtonTapped = this.submitButtonTapped.bind(this);
 	}
 
-	
-
 	submitButtonTapped() {
 		const resetAction = NavigationActions.reset({
 			index: 0,

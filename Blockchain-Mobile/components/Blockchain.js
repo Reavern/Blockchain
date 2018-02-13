@@ -102,9 +102,3 @@ export class Blockchain {
 
 
 }
-
-export function wtf(str) {
-	fs.writeFile('./test.json', str, (err) => {
-		console.log(err)
-	})
-}
