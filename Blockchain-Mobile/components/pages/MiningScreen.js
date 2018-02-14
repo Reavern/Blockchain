@@ -2,37 +2,11 @@ import React from 'react';
 import { StyleSheet, Text, View, AsyncStorage, SectionList } from 'react-native';
 import { StackNavigator } from 'react-navigation';
 
-const data = [
-	{
-		data: ["1", "2", "3"],
-		title: "Ini Titleny"
-	},
-	{
-		data: ["4", "5", "6"],
-		title: "Title 2"
-	}
-];
-
 export default class App extends React.Component {
 	render() {
 		return (
 			<View style={styles.container}>
-				<SectionList
-					sections={ data }
-					renderItem={ ({item}) => 
-							<Text
-								style={styles.sectionItem}>
-								{ item }
-							</Text>
-					}
-					renderSectionHeader={ ({section}) =>
-						<Text 
-							style={styles.sectionList}>
-							{section.title}
-						</Text>
-					}
-					keyExtractor={(item, index) => index}
-				/>
+				
 			</View>
 		);
 	}
@@ -59,7 +33,7 @@ const styles = StyleSheet.create({
 		padding: 10,
 		height: 40,
 		fontSize: 18,
-		backgroundColor: 'lightgrey',
+		backgroundColor: '#FFF',
 		//borderRadius: 4,
 		borderWidth: 0.5,
 		borderColor: '#000',

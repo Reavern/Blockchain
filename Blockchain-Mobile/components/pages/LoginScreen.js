@@ -7,21 +7,7 @@ export default class App extends React.Component {
 
 	constructor(props) {
 		super(props);
-		this.state = {
-			user: "",
-			pass: ""
-		};
-		this.submitButtonTapped = this.submitButtonTapped.bind(this);
-	}
-
-	submitButtonTapped() {
-		const resetAction = NavigationActions.reset({
-			index: 0,
-			actions: [
-				NavigationActions.navigate({ routeName: 'Main' }),
-			],
-		});
-		this.props.navigation.dispatch(resetAction);
+		this.state = { idktp: "" };
 	}
 
 	render() {
@@ -29,32 +15,20 @@ export default class App extends React.Component {
 			<View style={styles.container}>
 				<TextInput 
 					style={styles.textInput}
-					value={this.state.user}
+					value={this.state.idktp}
 					autoCorrect={false}
 					underlineColorAndroid='transparent'
-					placeholder="Username"
+					placeholder="No. KTP"
 
 					onChangeText={ (text) => {
 						this.setState({
-							user: text
+							idktp: text
 						})
 					}} />
-				<TextInput 
-					style={styles.textInput}
-					value={this.state.user}
-					autoCorrect={false}
-					underlineColorAndroid='transparent'
-					placeholder="Password"
-					secureTextEntry={true}
 
-					onChangeText={ (text) => {
-						this.setState({
-							pass: text
-						})
-					}} />
 				<TouchableOpacity 
 					style={styles.submitButton}
-					onPress={this.submitButtonTapped}>
+					onPress={() => {this.props.navigation.navigate('Voting', {idktp: this.state.idktp});}}>
 					<Text>Submit</Text>
 				</TouchableOpacity>
 			</View>

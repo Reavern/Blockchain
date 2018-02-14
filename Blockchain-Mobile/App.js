@@ -3,16 +3,26 @@ import { StyleSheet, Text, View, AsyncStorage, Platform } from 'react-native';
 import { StackNavigator, TabNavigator } from 'react-navigation';
 import { getStatusBarHeight } from 'react-native-status-bar-height';
 
-import LoginScreen from './components/LoginScreen.js';
-import HomeScreen from './components/main/HomeScreen.js';
-import TestScreen from './components/main/TestScreen.js';
+import LoginScreen from './components/pages/LoginScreen.js';
+import VotingScreen from './components/pages/VotingScreen.js';
+import MiningScreen from './components/pages/MiningScreen.js';
+import BlockchainScreen from './components/pages/BlockchainScreen.js';
 
 const MainRouter = TabNavigator({
-	Home: {
-		screen: HomeScreen,
+	Login: {
+		screen: LoginScreen,
+		navigationOptions: {
+			title: 'Login',
+			headerStyle: {
+				height: 0
+			}
+		}
 	},
-	Test: {
-		screen: TestScreen,
+	Mining: {
+		screen: MiningScreen,
+	},
+	Blockchain: {
+		screen: BlockchainScreen,
 	}
 }, {
 	tabBarOptions: {
@@ -23,21 +33,24 @@ const MainRouter = TabNavigator({
 			fontWeight: 'bold'
 		}
 	},
-	//tabBarPosition: 'bottom'
+	tabBarPosition: 'bottom',
+	navigationOptions: {
+		headerTintColor: 'white',
+		headerStyle: { backgroundColor: 'deepskyblue', borderWidth: 1, borderBottomColor: 'white' },
+	}
 })
 
 const RootRouter = StackNavigator({
   	Login: {
-		screen: LoginScreen,
-	},
-	Main: {
 		screen: MainRouter,
-	}
-}, {
-	navigationOptions: {
-		headerStyle: {
-			height: 0
-		}
+		// navigationOptions: {
+		// 	headerStyle: {
+		// 		height: 0
+		// 	}
+		// }
+	},
+	Voting: {
+		screen: VotingScreen,
 	}
 })
 

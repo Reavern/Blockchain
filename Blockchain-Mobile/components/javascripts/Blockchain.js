@@ -2,8 +2,8 @@ const CryptoJS = require('crypto-js');
 
 const DIFFICULTY = 4;
 export class Block {
-	constructor(index, prevHash, timestamp, data) {
-		this.index = index;
+	constructor(/*index,*/ prevHash, timestamp, data) {
+		//this.index = index;
 		this.prevHash = prevHash;
 		this.timestamp = timestamp;
 		this.data = data;
@@ -12,7 +12,7 @@ export class Block {
 	}
 
 	generate_block_hash() {
-		const toBeHashed = this.index + this.prevHash + this.timestamp + JSON.stringify(this.data) + this.nonce;
+		const toBeHashed = /*this.index*/ + this.prevHash + this.timestamp + JSON.stringify(this.data) + this.nonce;
 		const hashedBlock = CryptoJS.SHA256(toBeHashed).toString(CryptoJS.enc.Hex);	
 		return hashedBlock;
 	}
@@ -25,7 +25,7 @@ export class Block {
 	}
 }
 
-const GENESIS_INDEX = 0;
+//const GENESIS_INDEX = 0;
 const GENESIS_PREV_HASH = "0";
 const GENESIS_TIMESTAMP = 0;
 const GENESIS_DATA = "Genesis Block";
@@ -36,7 +36,7 @@ export class Blockchain {
 	}
 
 	generate_genesis_block() {
-		const genesisBlock = new Block(GENESIS_INDEX, GENESIS_PREV_HASH, GENESIS_TIMESTAMP, GENESIS_DATA);
+		const genesisBlock = new Block(/*GENESIS_INDEX,*/ GENESIS_PREV_HASH, GENESIS_TIMESTAMP, GENESIS_DATA);
 		genesisBlock.mine_block();
 		return genesisBlock;		
 	}
@@ -51,10 +51,10 @@ export class Blockchain {
 		}
 	}
 	is_block_valid(prevBlock, nextBlock) {
-		if (prevBlock.index + 1 !== nextBlock.index) {
+		/*if (prevBlock.index + 1 !== nextBlock.index) {
 			console.log("Invalid Index !");
 			return false;
-		} else if (prevBlock.hash !== nextBlock.prevHash) {
+		} else*/ if (prevBlock.hash !== nextBlock.prevHash) {
 			console.log("Invalid Previous Hash !");
 			return false;
 		} else if (nextBlock.generate_block_hash() !== nextBlock.hash) {
@@ -92,13 +92,11 @@ export class Blockchain {
 
 	generate_next_block (nextData) {
 		const prevBlock = this.get_latest_block();
-		const nextIndex = prevBlock.index + 1;
+		//const nextIndex = prevBlock.index + 1;
 
 		const nextTimestamp = new Date().getTime() / 1000;
-		const nextBlock = new Block(nextIndex, prevBlock.hash, nextTimestamp, nextData)
+		const nextBlock = new Block(/*nextIndex,*/ prevBlock.hash, nextTimestamp, nextData)
 
 		return nextBlock;
 	}
-
-
 }
