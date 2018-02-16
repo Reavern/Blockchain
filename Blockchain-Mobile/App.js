@@ -8,15 +8,11 @@ import VotingScreen from './components/pages/VotingScreen.js';
 import MiningScreen from './components/pages/MiningScreen.js';
 import BlockchainScreen from './components/pages/BlockchainScreen.js';
 
+import './components/javascripts/Consensus.js'
+
 const MainRouter = TabNavigator({
-	Login: {
-		screen: LoginScreen,
-		navigationOptions: {
-			title: 'Login',
-			headerStyle: {
-				height: 0
-			}
-		}
+	Voting: {
+		screen: VotingScreen,
 	},
 	Mining: {
 		screen: MiningScreen,
@@ -42,15 +38,15 @@ const MainRouter = TabNavigator({
 
 const RootRouter = StackNavigator({
   	Login: {
-		screen: MainRouter,
-		// navigationOptions: {
-		// 	headerStyle: {
-		// 		height: 0
-		// 	}
-		// }
+		screen: LoginScreen,
+		navigationOptions: {
+			headerStyle: {
+				height: 0
+			}
+		}
 	},
 	Voting: {
-		screen: VotingScreen,
+		screen: MainRouter,
 	}
 })
 

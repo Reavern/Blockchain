@@ -1,6 +1,6 @@
 import React from 'react';
 import { StyleSheet, Text, View, AsyncStorage } from 'react-native';
-var Block = require('./components/Blockchain.js')
+const Block = require('./components/Blockchain.js')
 
 const Blockchain = new Block.Blockchain();
 
