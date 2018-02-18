@@ -2,30 +2,32 @@ var app = require('express')();
 var server = require('http').Server(app);
 var io = require('socket.io')(server, { pingTimeout: 30000 });
 
-io.on('connection', function(socket){
-	console.log('a user connected : ' + socket);  
+var kpuClients = {};
 
-	socket.on('sending', function(data){      
-		io.emit('recieve', data);    
+io.on('connection', (socket) => {
+	console.log('A User Connected');  
 
-      
-		if(data=="exit"){
-			socket.disconnect( console.log('sender disconnected'));
-		}
-	}); 
+	kpuClients[socket.handshake.sessionID] = socket;
 
-	socket.on('cons', function(data){      
+	socket.on('cons', (data) => {      
 		console.log(data);
 		var json = JSON.stringify(data)
 		io.emit('sig', json)
 	}); 
 
+
+
+	// Raft
+	socket.on('kpu-propose-leader', (id) => {
+		io.emit('kpu-propose-leader-listener', id);
+	});
+
+	socket.on('kpu-propose-leader-feedback', (id, result) => {
+		socket.to(id).emit('kpu-propose-leader-result', result);
+	});
+
+
 });
 
-app.get('/', function (req, res) {
-	res.sendfile(__dirname + '/index.html');
-});
 
-server.listen(3000, function(){
-	console.log('listening on *:3000');
-});
+server.listen(3000, () => { console.log('Listening On Port 3000'); });

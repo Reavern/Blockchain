@@ -1,6 +1,6 @@
 const IP_ADDRESS = 'http://192.168.1.4:3000'
 
-var socket = require('socket.io-client')(IP_ADDRESS);
+const socket = require('socket.io-client')(IP_ADDRESS);
 var isConnected = false;
 
 socket.on('connect', function(){
