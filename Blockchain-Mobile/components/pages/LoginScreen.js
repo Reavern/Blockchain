@@ -11,42 +11,39 @@ export default class App extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = { address: "" };
-		//this.generateAddress = this.generateAddress.bind(this)
+		this.generatePrivateKey = this.generatePrivateKey.bind(this);
+		this.generateAddress = this.generateAddress.bind(this);
+	}
+
+	generatePrivateKey() {
+		var charset = "0123456789abcdef";
+		var result = "";
+		for( var i=0; i < 32; i++ )
+		        result += charset[Math.floor(Math.random() * charset.length)];
+		return result;
 	}
 
 	generateAddress() {
-		console.log("Test")
-		var msg = "21232f297a57a5a743894a0e4a801fc3"
-		var privKey = ec.keyFromPrivate("448ebe097645b5a8b5c892dba0110a68", 'hex');
-		var pubKey = privKey.getPublic().encode('hex');
-		var verKey = ec.keyFromPublic(pubKey, 'hex')
-
-
-		console.log(pubKey)
-		var sign = 	privKey.sign(msg).toDER();
-		console.log("signature: " + sign)
-
-		var tf = verKey.verify(msg, sign)
-
-		console.log(tf)
-
+		global.privKey = this.generatePrivateKey();
+		var privKey = ec.keyFromPrivate(global.privKey, 'hex');
+		global.pubKey = privKey.getPublic().encode('hex');
+		this.setState({
+			address: global.pubKey
+		})
 	}
+
+	
 
 	render() {
 		return (
 			<View style={styles.container}>
 				<TextInput 
 					style={styles.textInput}
-					value={this.state.idktp}
+					value={this.state.address}
 					autoCorrect={false}
 					underlineColorAndroid='transparent'
 					placeholder="Address"
-
-					onChangeText={ (text) => {
-						this.setState({
-							address: text
-						})
-					}} />
+					editable={false} />
 
 				<TouchableOpacity 
 					style={styles.submitButton}
@@ -88,3 +85,22 @@ const styles = StyleSheet.create({
 		justifyContent: 'center'
 	}
 });
+
+
+
+
+	
+		// console.log("Test")
+		// var msg = "21232f297a57a5a743894a0e4a801fc3"
+		// var privKey = ec.keyFromPrivate("448ebe097645b5a8b5c892dba0110a68", 'hex');
+		// var pubKey = privKey.getPublic().encode('hex');
+		// var verKey = ec.keyFromPublic(pubKey, 'hex')
+
+
+		// console.log(pubKey)
+		// var sign = 	privKey.sign(msg).toDER();
+		// console.log("signature: " + sign)
+
+		// var tf = verKey.verify(msg, sign)
+
+		// console.log(tf)

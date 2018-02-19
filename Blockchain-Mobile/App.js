@@ -9,6 +9,7 @@ import MiningScreen from './components/pages/MiningScreen.js';
 import BlockchainScreen from './components/pages/BlockchainScreen.js';
 
 import './components/javascripts/Consensus.js'
+import './components/javascripts/Global.js'
 
 const MainRouter = TabNavigator({
 	Voting: {

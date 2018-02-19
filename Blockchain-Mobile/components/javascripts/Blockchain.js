@@ -2,17 +2,18 @@ const CryptoJS = require('crypto-js');
 
 const DIFFICULTY = 4;
 export class Block {
-	constructor(index, prevHash, timestamp, data) {
+	constructor(index, prevHash, timestamp, data, sender) {
 		this.index = index;
 		this.prevHash = prevHash;
 		this.timestamp = timestamp;
 		this.data = data;
 		this.nonce = 0;
+		this.sender = sender;
 		this.hash = this.generate_block_hash();
 	}
 
 	generate_block_hash() {
-		const toBeHashed = this.index + this.prevHash + this.timestamp + JSON.stringify(this.data) + this.nonce;
+		const toBeHashed = this.index + this.prevHash + this.timestamp + JSON.stringify(this.data) + this.nonce + this.sender;
 		const hashedBlock = CryptoJS.SHA256(toBeHashed).toString(CryptoJS.enc.Hex);	
 		return hashedBlock;
 	}
@@ -29,6 +30,7 @@ const GENESIS_INDEX = 0;
 const GENESIS_PREV_HASH = "0";
 const GENESIS_TIMESTAMP = 0;
 const GENESIS_DATA = "Genesis Block";
+const GENESIS_SENDER = "Sender";
 
 export class Blockchain {
 	constructor() {
@@ -40,7 +42,7 @@ export class Blockchain {
 	}
 
 	generate_genesis_block() {
-		const genesisBlock = new Block(GENESIS_INDEX, GENESIS_PREV_HASH, GENESIS_TIMESTAMP, GENESIS_DATA);
+		const genesisBlock = new Block(GENESIS_INDEX, GENESIS_PREV_HASH, GENESIS_TIMESTAMP, GENESIS_DATA, GENESIS_SENDER);
 		genesisBlock.mine_block();
 		return genesisBlock;		
 	}
@@ -70,19 +72,6 @@ export class Blockchain {
 			return true;
 		}		
 	}
-	is_all_block_valid() {
-		for (let i = 1; i < this.chain.length; i++) {
-			const currBlock = this.chain[i];
-			const prevBlock = this.chain[i - 1];
-
-			if (!this.is_block_valid(prevBlock, currBlock)) {
-				console.log("Blockchain is invalid !");
-				return false;
-			}
-		}
-		console.log("Blockchain is valid !");
-		return true;
-	}
 
 	replace_chain (newBlock) {
 		if (this.is_block_valid(newBlock) && newBlock.length > this.chain.length) {
@@ -94,12 +83,12 @@ export class Blockchain {
 		}
 	}
 
-	generate_next_block (nextData) {
+	generate_next_block (nextData, nextSender) {
 		const prevBlock = this.get_latest_block();
 		const nextIndex = prevBlock.index + 1;
 
 		const nextTimestamp = new Date().getTime() / 1000;
-		const nextBlock = new Block(nextIndex, prevBlock.hash, nextTimestamp, nextData)
+		const nextBlock = new Block(nextIndex, prevBlock.hash, nextTimestamp, nextData, nextSender)
 
 		return nextBlock;
 	}

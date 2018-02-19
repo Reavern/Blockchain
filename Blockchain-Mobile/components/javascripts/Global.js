@@ -1,0 +1,2 @@
+global.privKey; 
+global.pubKey;

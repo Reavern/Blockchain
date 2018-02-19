@@ -19,52 +19,43 @@ export default class App extends React.Component {
 	}
 
 	render() {
-
-		global.sendMessage("TEST")
 		// var Blockchain = new BC.Blockchain();
 		// Blockchain.set_genesis_block()
 		// console.log(Blockchain)
 
-		const { params } = this.props.navigation.state;
-		const address = params ? params.address : null;
-		console.log(address)
-
 		return (
 			<View style={styles.container}>
 				<View style={styles.voteContainer}>
-					<View style={styles.voteColumn}>
-						<TouchableOpacity
-							style={styles.voteButton}
-							onPress={() => {
-								this.setState({
-									pilihan: CALON_NO_1
-								})
-							}}>
-							<Text>ASD</Text>
-						</TouchableOpacity>
-						<Text style={styles.voteText}>ASD</Text>
-					</View>
-					<View style={styles.voteColumn}>
-						<TouchableOpacity
-							style={styles.voteButton}
-							onPress={() => {
-								this.setState({
-									pilihan: CALON_NO_2
-								})
-							}}>
-							<Text>ASD</Text>
-						</TouchableOpacity>
-						<Text style={styles.voteText}>ASD</Text>
-					</View>
-
+					<Text>Anda Memilih : {this.state.pilihan}</Text>
 				</View>
-				<TouchableOpacity
-					style={styles.submitButton}
-					onPress={() => {
-						console.log(this.state.pilihan)
-					}}>
-					<Text>Submit</Text>
-				</TouchableOpacity>
+				<View style={styles.voteContainer}>
+					<View style={styles.voteColumn} >
+						<TouchableOpacity
+							style={styles.voteButton}
+							onPress={() => { this.setState({ pilihan: CALON_NO_1 }) }}>
+							<Text>{CALON_NO_1}</Text>
+						</TouchableOpacity>
+						<Text style={styles.voteText}>{CALON_NO_1}</Text>
+					</View>
+					<View style={styles.voteColumn} >
+						<TouchableOpacity
+							style={styles.voteButton}
+							onPress={() => { this.setState({ pilihan: CALON_NO_2 }) }}>
+							<Text>{CALON_NO_2}</Text>
+						</TouchableOpacity>
+						<Text style={styles.voteText}>{CALON_NO_2}</Text>
+					</View>
+				</View>
+				<View style={styles.voteContainer}>
+					<TouchableOpacity
+						style={styles.submitButton}
+						onPress={() => {
+							console.log(this.state.pilihan)
+						}}>
+						<Text>Submit</Text>
+					</TouchableOpacity>
+				</View>
+						
 			</View>
 		);
 	}
@@ -80,6 +71,9 @@ const styles = StyleSheet.create({
 	voteContainer: {
 		flex: 1,
 		flexDirection: 'row',
+		alignItems: 'center',
+		justifyContent: 'center',
+
 	},
 	voteColumn: {
 		flex: 1,
@@ -94,8 +88,13 @@ const styles = StyleSheet.create({
 		borderColor: '#000',
 
 	},
+	voteTextContainer: {
+		alignItems: 'center',
+		justifyContent: 'center',
+	},
 	voteText: {
-		flex: 1,
+
+		textAlign: 'center',
 	},
 	submitButton: {
 		height: 40,
@@ -106,3 +105,5 @@ const styles = StyleSheet.create({
 		justifyContent: 'center'
 	}
 });
+
+
