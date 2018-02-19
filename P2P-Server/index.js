@@ -2,32 +2,47 @@ var app = require('express')();
 var server = require('http').Server(app);
 var io = require('socket.io')(server, { pingTimeout: 30000 });
 
-var kpuClients = {};
+var connectedUsers = 0;
+var users = {}
 
 io.on('connection', (socket) => {
 	console.log('A User Connected');  
+	connectedUsers++;
+	users[socket.id] = socket
 
-	kpuClients[socket.handshake.sessionID] = socket;
+	socket.on('disconnect', (reason) => {
+		console.log('A User Disconnected');
+		connectedUsers--;
+	})
 
-	socket.on('cons', (data) => {      
-		console.log(data);
-		var json = JSON.stringify(data)
-		io.emit('sig', json)
-	}); 
+	// Raft Socket
 
-
-
-	// Raft
-	socket.on('kpu-propose-leader', (id) => {
-		io.emit('kpu-propose-leader-listener', id);
+	// Voting
+	socket.on('RequestVote', (candidateId, index) => {
+		io.emit('DoVote', candidateId, index);
+	});
+	socket.on('VoteForCandidate', (candidateId, result) => {
+		users[candidateId].emit('VoteResult', result, connectedUsers);
 	});
 
-	socket.on('kpu-propose-leader-feedback', (id, result) => {
-		socket.to(id).emit('kpu-propose-leader-result', result);
+	socket.on('Elected', (chain) => {
+		io.emit('NewLeaderElected', chain);
+
 	});
+
+	// Heartbeat
+	socket.on('SendHeartbeat', () => {
+		io.emit('HeartbeatListener');
+	});
+
+
 
 
 });
+
+
+
+
 
 
 server.listen(3000, () => { console.log('Listening On Port 3000'); });

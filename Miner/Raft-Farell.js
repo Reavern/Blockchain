@@ -1,9 +1,5 @@
-const IP_ADDRESS = 'http://192.168.1.9:3000'
+const IP_ADDRESS = 'http://localhost:3000'
 const socket = require('socket.io-client')(IP_ADDRESS);
-const BC = require('./Blockchain.js');
-
-global.blockchain = new BC.Blockchain()
-global.blockchain.setGenesisBlock()
 
 // Persistent State
 var isLeader = false;
@@ -20,25 +16,25 @@ var lastApplied = 0;
 var setTimeoutLeader, setTimeoutVote;
 
 socket.on('connect', () => {
-	console.log("Connected: " + socket.id);
-	resetLeaderTimeout();
+	console.log("Connected: " + socket.id) 
 });
 socket.on('disconnect', () => { 
-	console.log("Disconnected") ;
+	console.log("Disconnected") 
 	isLeader = false;
 });
 
 // Request Vote
 function requestVote() {
+	var index = 0; // Index = blockchain length
 	voteResult = [];
-	socket.emit('RequestVote', socket.id, global.blockchain.chain.length)
+	socket.emit('RequestVote', socket.id, index)
 	resetVote()	
 }
 
 function resetVote() {
 	voteResult = [];
 	setTimeoutVote = setInterval(() => {
-		socket.emit('RequestVote', socket.id, global.blockchain.chain.length);
+		socket.emit('RequestVote', socket.id);
 	}, randomTimeout());
 }
 
@@ -62,15 +58,15 @@ function checkResult(connectedUsers) {
 socket.on('VoteResult', (result, connectedUsers) => {
 	voteResult.push(result);
 	if (checkResult(connectedUsers)) {
-		const syncData = JSON.stringify(global.blockchain)
-		socket.emit('Elected', syncData);
+		socket.emit('Elected');
 		isLeader = true;
 		console.log("I'm Elected");
 	}
 });
 
 socket.on('DoVote', (candidateId, index) => {
-	if ((index >= global.blockchain.chain.length && votedFor == "") || votedFor == candidateId) {
+	var indexx = 0;
+	if ((index >= indexx && votedFor == "") || votedFor == candidateId) {
 		socket.emit('VoteForCandidate', candidateId, true);
 		votedFor = candidateId;
 	} else {
@@ -79,9 +75,7 @@ socket.on('DoVote', (candidateId, index) => {
 	setTimeout(() => { votedFor == ""; }, 1000)	
 });
 
-socket.on('NewLeaderElected', (chain) => {
-	const chainSync = JSON.parse(chain)
-	global.blockchain = chainSync;
+socket.on('NewLeaderElected', () => {
 	clearTimeout(setTimeoutVote);
 	resetLeaderTimeout();
 })
@@ -102,14 +96,11 @@ setInterval(() => {
 }, 250)
 
 socket.on('HeartbeatListener', () => {
+	console.log("Heartbeat Received")
 	resetLeaderTimeout();
 })
 
 // Append Entries
-global.addNewTransaction = function(data, senderId) {
-
-}
-
 
 // Helper Functions
 function randomTimeout() {
@@ -120,3 +111,4 @@ function randomTimeout() {
 
 
 // First Time Run
+resetLeaderTimeout();

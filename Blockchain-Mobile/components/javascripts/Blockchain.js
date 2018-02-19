@@ -1,29 +1,48 @@
 const CryptoJS = require('crypto-js');
+const EC = require('elliptic').ec;
+const ec = new EC('secp256k1');
 
-const DIFFICULTY = 4;
+//const DIFFICULTY = 4;
 export class Block {
 	constructor(index, prevHash, timestamp, data, sender) {
 		this.index = index;
 		this.prevHash = prevHash;
 		this.timestamp = timestamp;
 		this.data = data;
-		this.nonce = 0;
+		//this.nonce = 0;
 		this.sender = sender;
-		this.hash = this.generate_block_hash();
+		this.hash = this.generateBlockHash();
 	}
 
-	generate_block_hash() {
+	generateBlockHash() {
 		const toBeHashed = this.index + this.prevHash + this.timestamp + JSON.stringify(this.data) + this.nonce + this.sender;
 		const hashedBlock = CryptoJS.SHA256(toBeHashed).toString(CryptoJS.enc.Hex);	
 		return hashedBlock;
 	}
 
-	mine_block() {
-		while(this.hash.substring(0, DIFFICULTY) !== Array(DIFFICULTY + 1).join("0")) {
-			this.nonce++;
-			this.hash = this.generate_block_hash();
-		}
-	}
+	
+		// console.log("Test")
+		// var msg = "21232f297a57a5a743894a0e4a801fc3"
+		// var privKey = ec.keyFromPrivate("448ebe097645b5a8b5c892dba0110a68", 'hex');
+		// var pubKey = privKey.getPublic().encode('hex');
+		// var verKey = ec.keyFromPublic(pubKey, 'hex')
+
+
+		// console.log(pubKey)
+		// var sign = 	privKey.sign(msg).toDER();
+		// console.log("signature: " + sign)
+
+		// var tf = verKey.verify(msg, sign)
+
+		// console.log(tf)
+
+
+	// mine_block() {
+	// 	while(this.hash.substring(0, DIFFICULTY) !== Array(DIFFICULTY + 1).join("0")) {
+	// 		this.nonce++;
+	// 		this.hash = this.generateBlockHash();
+	// 	}
+	// }
 }
 
 const GENESIS_INDEX = 0;
@@ -37,34 +56,34 @@ export class Blockchain {
 		this.chain = [];
 	}
 
-	set_genesis_block() {
-		this.chain.push(this.generate_genesis_block());
+	setGenesisBlock() {
+		this.chain.push(this.generateGenesisBlock());
 	}
 
-	generate_genesis_block() {
+	generateGenesisBlock() {
 		const genesisBlock = new Block(GENESIS_INDEX, GENESIS_PREV_HASH, GENESIS_TIMESTAMP, GENESIS_DATA, GENESIS_SENDER);
-		genesisBlock.mine_block();
+		//genesisBlock.mine_block();
 		return genesisBlock;		
 	}
 
-	get_latest_block() {
+	getLatestBlock() {
 		return this.chain[this.chain.length - 1];
 	}
-	add_new_block(newBlock) {
-		if (this.is_block_valid(this.get_latest_block(), newBlock)) {
-			newBlock.mine_block();
+	addNewBlock(newBlock) {
+		if (this.isBlockValid(this.getLatestBlock(), newBlock)) {
+			// newBlock.mine_block();
 			this.chain.push(newBlock);
 		}
 	}
-	is_block_valid(prevBlock, nextBlock) {
+	isBlockValid(prevBlock, nextBlock) {
 		if (prevBlock.index + 1 !== nextBlock.index) {
 			console.log("Invalid Index !");
 			return false;
 		} else if (prevBlock.hash !== nextBlock.prevHash) {
 			console.log("Invalid Previous Hash !");
 			return false;
-		} else if (nextBlock.generate_block_hash() !== nextBlock.hash) {
-			console.log(nextBlock.generate_block_hash())
+		} else if (nextBlock.generateBlockHash() !== nextBlock.hash) {
+			console.log(nextBlock.generateBlockHash())
 			console.log(nextBlock.hash)
 			console.log("Invalid Hash !");
 			return false;
@@ -73,18 +92,8 @@ export class Blockchain {
 		}		
 	}
 
-	replace_chain (newBlock) {
-		if (this.is_block_valid(newBlock) && newBlock.length > this.chain.length) {
-			console.log("Blockchain is invalid ! Replacing ...");
-			this.chain = newBlock;
-			// BC ke yang lain
-		} else {
-			console.log("Received Blockchain Invalid !");
-		}
-	}
-
-	generate_next_block (nextData, nextSender) {
-		const prevBlock = this.get_latest_block();
+	generateNextBlock (nextData, nextSender) {
+		const prevBlock = this.getLatestBlock();
 		const nextIndex = prevBlock.index + 1;
 
 		const nextTimestamp = new Date().getTime() / 1000;
