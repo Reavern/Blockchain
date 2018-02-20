@@ -2,8 +2,14 @@ const IP_ADDRESS = 'http://192.168.1.9:3000'
 const socket = require('socket.io-client')(IP_ADDRESS);
 const BC = require('./Blockchain.js');
 
+global.privKey = ""; 
+global.pubKey = "";
 global.blockchain = new BC.Blockchain()
 global.blockchain.setGenesisBlock()
+
+function getBlockchainIndex() {
+	return global.blockchain.chain.length;
+}
 
 // Persistent State
 var isLeader = false;
@@ -107,7 +113,7 @@ socket.on('HeartbeatListener', () => {
 
 // Append Entries
 global.addNewTransaction = function(data, senderId) {
-
+	
 }
 
 

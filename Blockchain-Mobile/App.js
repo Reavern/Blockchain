@@ -9,17 +9,23 @@ import MiningScreen from './components/pages/MiningScreen.js';
 import BlockchainScreen from './components/pages/BlockchainScreen.js';
 
 import './components/javascripts/Consensus.js'
-import './components/javascripts/Global.js'
 
-const MainRouter = TabNavigator({
-	Voting: {
-		screen: VotingScreen,
-	},
-	Mining: {
-		screen: MiningScreen,
+const LoginRouter = TabNavigator({
+	Login: {
+		screen: LoginScreen,
+		navigationOptions: {
+			title: 'Login',
+			headerTintColor: 'white',
+			headerStyle: { backgroundColor: 'deepskyblue', borderWidth: 1, borderBottomColor: 'white' },
+		}
 	},
 	Blockchain: {
 		screen: BlockchainScreen,
+		navigationOptions: {
+			title: 'Blockchain',
+			headerTintColor: 'white',
+			headerStyle: { backgroundColor: 'deepskyblue', borderWidth: 1, borderBottomColor: 'white' },
+		}
 	}
 }, {
 	tabBarOptions: {
@@ -38,16 +44,16 @@ const MainRouter = TabNavigator({
 })
 
 const RootRouter = StackNavigator({
-  	Login: {
-		screen: LoginScreen,
-		navigationOptions: {
-			headerStyle: {
-				height: 0
-			}
-		}
+  	LoginRoutes: {
+		screen: LoginRouter,
 	},
 	Voting: {
-		screen: MainRouter,
+		screen: VotingScreen,
+		navigationOptions: {
+			title: 'Voting',
+			headerTintColor: 'white',
+			headerStyle: { backgroundColor: 'deepskyblue', borderWidth: 1, borderBottomColor: 'white' },
+		}
 	}
 })
 

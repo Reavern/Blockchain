@@ -15,6 +15,22 @@ export default class App extends React.Component {
 		this.generateAddress = this.generateAddress.bind(this);
 	}
 
+	componentWillMount() {
+		var msg = "21232f297a57a5a743894a0e4a801fc3"
+		var privKey = ec.keyFromPrivate("448ebe097645b5a8b5c892dba0110a68", 'hex');
+		var pubKey = privKey.getPublic().encode('hex');
+		var verKey = ec.keyFromPublic(pubKey, 'hex')
+
+
+		console.log(pubKey)
+		var sign = 	privKey.sign(msg).toDER();
+		var data = "["+sign.toString()+"]"
+		data = JSON.parse(data)
+		var tf = verKey.verify(msg, data)
+
+		console.log(tf)
+	}
+
 	generatePrivateKey() {
 		var charset = "0123456789abcdef";
 		var result = "";
@@ -85,22 +101,3 @@ const styles = StyleSheet.create({
 		justifyContent: 'center'
 	}
 });
-
-
-
-
-	
-		// console.log("Test")
-		// var msg = "21232f297a57a5a743894a0e4a801fc3"
-		// var privKey = ec.keyFromPrivate("448ebe097645b5a8b5c892dba0110a68", 'hex');
-		// var pubKey = privKey.getPublic().encode('hex');
-		// var verKey = ec.keyFromPublic(pubKey, 'hex')
-
-
-		// console.log(pubKey)
-		// var sign = 	privKey.sign(msg).toDER();
-		// console.log("signature: " + sign)
-
-		// var tf = verKey.verify(msg, sign)
-
-		// console.log(tf)
