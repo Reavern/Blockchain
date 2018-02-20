@@ -9,27 +9,29 @@ export class Block {
 		this.prevHash = prevHash;
 		this.timestamp = timestamp;
 		this.data = data;
-		//this.nonce = 0;
 		this.sender = sender;
 		this.hash = this.generateBlockHash();
+
+		if (this.index != 0) {
+			this.sign = this.signHash();
+		} else {
+			this.sign = "Sign";
+		}
 	}
 
 	generateBlockHash() {
-		const toBeHashed = this.index + this.prevHash + this.timestamp + JSON.stringify(this.data) + this.nonce + this.sender;
+		const toBeHashed = this.index + this.prevHash + this.timestamp + this.data + this.sender;
 		const hashedBlock = CryptoJS.SHA256(toBeHashed).toString(CryptoJS.enc.Hex);	
 		return hashedBlock;
 	}
 
-	
+	signHash() {
+		var prKey = ec.keyFromPrivate(global.privKey, 'hex');
+		var signedHash = prKey.sign(this.hash).toDER();
+		var signedString = "[" + signedHash.toString() + "]";
+		return signedString;
+	}
 
-
-
-	// mine_block() {
-	// 	while(this.hash.substring(0, DIFFICULTY) !== Array(DIFFICULTY + 1).join("0")) {
-	// 		this.nonce++;
-	// 		this.hash = this.generateBlockHash();
-	// 	}
-	// }
 }
 
 const GENESIS_INDEX = 0;
@@ -49,7 +51,6 @@ export class Blockchain {
 
 	generateGenesisBlock() {
 		const genesisBlock = new Block(GENESIS_INDEX, GENESIS_PREV_HASH, GENESIS_TIMESTAMP, GENESIS_DATA, GENESIS_SENDER);
-		//genesisBlock.mine_block();
 		return genesisBlock;		
 	}
 
@@ -58,7 +59,6 @@ export class Blockchain {
 	}
 	addNewBlock(newBlock) {
 		if (this.isBlockValid(this.getLatestBlock(), newBlock)) {
-			// newBlock.mine_block();
 			this.chain.push(newBlock);
 		}
 	}
@@ -83,7 +83,7 @@ export class Blockchain {
 		const prevBlock = this.getLatestBlock();
 		const nextIndex = prevBlock.index + 1;
 
-		const nextTimestamp = new Date().getTime() / 1000;
+		const nextTimestamp = new Date().getTime();
 		const nextBlock = new Block(nextIndex, prevBlock.hash, nextTimestamp, nextData, nextSender)
 
 		return nextBlock;

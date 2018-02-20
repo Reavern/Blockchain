@@ -4,6 +4,7 @@ var io = require('socket.io')(server, { pingTimeout: 30000 });
 
 var connectedUsers = 0;
 var users = {}
+var leader = "";
 
 io.on('connection', (socket) => {
 	console.log('A User Connected');  
@@ -17,7 +18,7 @@ io.on('connection', (socket) => {
 
 	// Raft Socket
 
-	// Voting
+	// Leader Election
 	socket.on('RequestVote', (candidateId, index) => {
 		io.emit('DoVote', candidateId, index);
 	});
@@ -25,10 +26,19 @@ io.on('connection', (socket) => {
 		users[candidateId].emit('VoteResult', result, connectedUsers);
 	});
 
-	socket.on('Elected', (chain) => {
-		io.emit('NewLeaderElected', chain);
-
+	socket.on('Elected', (leaderId) => {
+		leader = leaderId;
+		io.emit('NewLeaderElected');
 	});
+
+
+	// Sync
+	socket.on('RequestSync', (userId) => {
+		users[leader].emit('SyncRequest', userId)
+	})
+	socket.on('SendSync', (chain, userId) => {
+		users[userId].emit('SyncListener', chain)
+	})
 
 	// Heartbeat
 	socket.on('SendHeartbeat', () => {
