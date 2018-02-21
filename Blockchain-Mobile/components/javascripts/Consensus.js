@@ -1,4 +1,4 @@
-const IP_ADDRESS = 'http://192.168.1.10:3000'
+const IP_ADDRESS = 'http://192.168.1.252:3000'
 const socket = require('socket.io-client')(IP_ADDRESS);
 const BC = require('./Blockchain.js');
 const EC = require('elliptic').ec;
@@ -31,11 +31,15 @@ function randomTimeout() {
 var isLeader = false;
 var votedFor = "";
 
+// First Time State
+var hasLeader = false;
+var isFirstTimeSynced = false;
+
 // Candidate State
 var voteResult = [];
 
 // Timeouts
-var setTimeoutLeader, setTimeoutVote;
+var setTimeoutLeader, setTimeoutVote, setTimeoutFirstTime;
 var leaderTimeout = 1000;
 
 socket.on('connect', () => {
@@ -52,10 +56,11 @@ function requestVote() {
 	voteResult = [];
 	socket.emit('RequestVote', socket.id, global.blockchain.chain.length)
 	leaderTimeout = randomTimeout();
+	resetLeaderTimeout();
 }
 
 function checkResult(connectedUsers) {
-	var halfUsers = connectedUsers / 2;
+	var halfUsers = Math.floor(connectedUsers / 2);
 	var trueCount = 0;
 	var falseCount = 0;
 	for (var x = 0; x < voteResult.length; x++) {
@@ -73,9 +78,10 @@ function checkResult(connectedUsers) {
 socket.on('VoteResult', (result, connectedUsers) => {
 	voteResult.push(result);
 	if (checkResult(connectedUsers)) {
+		console.log("I'm Elected");
 		socket.emit('Elected', socket.id);
 		isLeader = true;
-		console.log("I'm Elected");
+		
 	}
 });
 
@@ -86,10 +92,9 @@ socket.on('DoVote', (candidateId, index) => {
 	} else {
 		socket.emit('VoteForCandidate', candidateId, false);
 	}
-	setTimeout(() => { votedFor == ""; }, 1000)	
 });
 
-socket.on('NewLeaderElected', (chain) => {
+socket.on('NewLeaderElected', () => {
 	leaderTimeout = 1000;
 	socket.emit('RequestSync', socket.id);
 	clearTimeout(setTimeoutVote);
@@ -100,8 +105,11 @@ socket.on('NewLeaderElected', (chain) => {
 socket.on('SyncListener', (chain) => {
 	const chainSync = JSON.parse(chain)
 	global.blockchain = chainSync;
+	isFirstTimeSynced = true;
+	clearTimeout(setTimeoutFirstTime);
 	console.log("Blockchain Synced!")
 })
+// Leader Send Sync
 socket.on('SyncRequest', (userId) => {
 	const syncData = JSON.stringify(global.blockchain)
 	socket.emit('SendSync', syncData, userId);
@@ -111,6 +119,7 @@ socket.on('SyncRequest', (userId) => {
 // Hearbeat
 function resetLeaderTimeout() {
 	voteResult = [];
+	votedFor == "";
 	clearTimeout(setTimeoutLeader);
 	setTimeoutLeader = setTimeout(() => {
 		console.log("Leader Election By: " + socket.id)
@@ -125,6 +134,7 @@ setInterval(() => {
 }, 250)
 
 socket.on('HeartbeatListener', () => {
+	hasLeader = true;
 	resetLeaderTimeout();
 })
 
@@ -135,5 +145,13 @@ global.addNewTransaction = function(data, senderId) {
 
 
 // First Time Run
-resetLeaderTimeout();
-socket.emit('RequestSync', socket.id);
+function firstTimeRun() {
+	resetLeaderTimeout();
+	setTimeoutFirstTime = setInterval(() => {
+		if (hasLeader && !isFirstTimeSynced) {
+			socket.emit('RequestSync', socket.id);
+		}
+	}, 500)
+}
+
+firstTimeRun();

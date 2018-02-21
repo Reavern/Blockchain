@@ -3,8 +3,8 @@ var server = require('http').Server(app);
 var io = require('socket.io')(server, { pingTimeout: 30000 });
 
 var connectedUsers = 0;
-var users = {}
-var leader = "";
+var users = {};
+var leader = "00000000000000000000";
 
 io.on('connection', (socket) => {
 	console.log('A User Connected');  
@@ -34,6 +34,7 @@ io.on('connection', (socket) => {
 
 	// Sync
 	socket.on('RequestSync', (userId) => {
+		console.log(userId + " Requested Sync")
 		users[leader].emit('SyncRequest', userId)
 	})
 	socket.on('SendSync', (chain, userId) => {
