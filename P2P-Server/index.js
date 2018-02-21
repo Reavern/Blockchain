@@ -1,10 +1,10 @@
 var app = require('express')();
 var server = require('http').Server(app);
-var io = require('socket.io')(server, { pingTimeout: 30000 });
+var io = require('socket.io')(server, { pingTimeout: 3000 });
 
 var connectedUsers = 0;
 var users = {};
-var leader = "00000000000000000000";
+var leader = "";
 
 io.on('connection', (socket) => {
 	console.log('A User Connected');  
@@ -23,7 +23,9 @@ io.on('connection', (socket) => {
 		io.emit('DoVote', candidateId, index);
 	});
 	socket.on('VoteForCandidate', (candidateId, result) => {
-		users[candidateId].emit('VoteResult', result, connectedUsers);
+		if(users[candidateId] != undefined) {
+			users[candidateId].emit('LeaderVoteResult', result, connectedUsers);
+		}
 	});
 
 	socket.on('Elected', (leaderId) => {
@@ -31,14 +33,36 @@ io.on('connection', (socket) => {
 		io.emit('NewLeaderElected');
 	});
 
-
 	// Sync
 	socket.on('RequestSync', (userId) => {
 		console.log(userId + " Requested Sync")
-		users[leader].emit('SyncRequest', userId)
+		if(users[leader] != undefined) {
+			users[leader].emit('SyncRequest', userId)
+		}
 	})
-	socket.on('SendSync', (chain, userId) => {
-		users[userId].emit('SyncListener', chain)
+	socket.on('SendSync', (chain, pool, userId) => {
+		if(users[userId] != undefined) {
+			users[userId].emit('SyncListener', chain, pool)
+		}
+	})
+
+	// Append
+	socket.on('AddDataToPool', (nextBlock) => {
+		io.emit('DataToPool', nextBlock);
+	})
+	socket.on('ProcessPool', (block) => {
+		io.emit('DataToVote', block);
+	})
+	socket.on('VoteForData', (result) => {
+		if(users[leader] != undefined) {
+			users[leader].emit('DataVoteResult', result, connectedUsers)
+		}
+	})
+	socket.on('CommitData', (block) => {
+		io.emit('DataToCommit', block);
+	})
+	socket.on('RemoveData', () => {
+		io.emit('DataToRemove');
 	})
 
 	// Heartbeat

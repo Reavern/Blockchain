@@ -2,9 +2,6 @@ import React from 'react';
 import { StyleSheet, Text, View, AsyncStorage, Dimensions, TouchableOpacity, Button } from 'react-native';
 import { StackNavigator } from 'react-navigation';
 
-const BC = require('../javascripts/Blockchain.js')
-//import { sendEvent } from '../javascripts/p2p.js'
-
 const size = Dimensions.get('window').width * 0.4;
 
 const CALON_NO_1 = "Anies";
@@ -18,11 +15,11 @@ export default class App extends React.Component {
 		}
 	}
 
-	render() {
-		// var Blockchain = new BC.Blockchain();
-		// Blockchain.set_genesis_block()
-		// console.log(Blockchain)
+	submitButtonTapped() {
+		global.addNewTransaction(this.state.pilihan);
+	}
 
+	render() {
 		return (
 			<View style={styles.container}>
 				<View style={styles.voteContainer}>
@@ -49,9 +46,7 @@ export default class App extends React.Component {
 				<View style={styles.voteContainer}>
 					<TouchableOpacity
 						style={styles.submitButton}
-						onPress={() => {
-							console.log(this.state.pilihan)
-						}}>
+						onPress={() => { this.submitButtonTapped() }}>
 						<Text>Submit</Text>
 					</TouchableOpacity>
 				</View>

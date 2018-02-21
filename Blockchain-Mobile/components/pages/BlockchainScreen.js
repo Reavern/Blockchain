@@ -1,29 +1,38 @@
 import React from 'react';
-import { StyleSheet, Text, View, AsyncStorage, FlatList, Dimensions } from 'react-native';
-import { StackNavigator } from 'react-navigation';
+import { StyleSheet, Text, View, FlatList, Dimensions } from 'react-native';
 
-const data = [
-	{ key: '12312', time: '321' },
-	{ key: '3213', time: '1231' }
-];
 const width = Dimensions.get('window').width * 0.9;
 
 export default class App extends React.Component {
 
+	constructor(props) {
+		super(props);
+		this.state = { blocks: [] };
+	}
+
+	componentDidMount() {
+		setInterval(()=> {
+			this.setState({
+				blocks: global.blockchain.chain
+			})
+		}, 1000)		
+	}
 
 	render() {
 		return (
 			<View style={styles.container}>
 				<FlatList
-					data={data}
+					data={this.state.blocks}
+					extraData={this.state}
 					renderItem={ ({item}) => 
 						<View style={styles.sectionBack}>
 							<Text
 								style={styles.sectionItem}>
-								{ item.key }
+								{ item.data }
 							</Text>
 						</View>
 					}
+					keyExtractor={(item, index) => index}
 				/>
 			</View>
 		);

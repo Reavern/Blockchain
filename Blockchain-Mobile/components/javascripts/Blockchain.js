@@ -34,6 +34,12 @@ export class Block {
 
 }
 
+function getBlockHash(block) {
+	const toBeHashed = block.index + block.prevHash + block.timestamp + block.data + block.sender;
+	const hashedBlock = CryptoJS.SHA256(toBeHashed).toString(CryptoJS.enc.Hex);	
+	return hashedBlock;
+}
+
 const GENESIS_INDEX = 0;
 const GENESIS_PREV_HASH = "0";
 const GENESIS_TIMESTAMP = 0;
@@ -64,14 +70,13 @@ export class Blockchain {
 	}
 	isBlockValid(prevBlock, nextBlock) {
 		if (prevBlock.index + 1 !== nextBlock.index) {
+
 			console.log("Invalid Index !");
 			return false;
 		} else if (prevBlock.hash !== nextBlock.prevHash) {
 			console.log("Invalid Previous Hash !");
 			return false;
-		} else if (nextBlock.generateBlockHash() !== nextBlock.hash) {
-			console.log(nextBlock.generateBlockHash())
-			console.log(nextBlock.hash)
+		} else if (getBlockHash(nextBlock) !== nextBlock.hash) {
 			console.log("Invalid Hash !");
 			return false;
 		} else {
@@ -79,11 +84,14 @@ export class Blockchain {
 		}		
 	}
 
-	generateNextBlock (nextData, nextSender) {
+	replaceChain(blockchain) {
+		this.chain = blockchain.chain;
+	}
+
+	generateNextBlock(nextData, nextSender, nextTimestamp) {
 		const prevBlock = this.getLatestBlock();
 		const nextIndex = prevBlock.index + 1;
 
-		const nextTimestamp = new Date().getTime();
 		const nextBlock = new Block(nextIndex, prevBlock.hash, nextTimestamp, nextData, nextSender)
 
 		return nextBlock;

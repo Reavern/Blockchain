@@ -5,7 +5,6 @@ import { getStatusBarHeight } from 'react-native-status-bar-height';
 
 import LoginScreen from './components/pages/LoginScreen.js';
 import VotingScreen from './components/pages/VotingScreen.js';
-import MiningScreen from './components/pages/MiningScreen.js';
 import BlockchainScreen from './components/pages/BlockchainScreen.js';
 
 import './components/javascripts/Consensus.js'
