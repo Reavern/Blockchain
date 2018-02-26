@@ -9,22 +9,47 @@ import BlockchainScreen from './components/pages/BlockchainScreen.js';
 
 import './components/javascripts/Consensus.js'
 
-const LoginRouter = TabNavigator({
+const MainRouter = StackNavigator({
 	Login: {
 		screen: LoginScreen,
 		navigationOptions: {
-			title: 'Login',
-			headerTintColor: 'white',
-			headerStyle: { backgroundColor: 'deepskyblue', borderWidth: 1, borderBottomColor: 'white' },
+			headerTitle: 'Login',
 		}
 	},
+	Voting: {
+		screen: VotingScreen,
+		navigationOptions: {
+			headerTitle: 'Voting',
+		}
+	}
+}, {
+	navigationOptions: {
+		headerTintColor: 'white',
+		headerStyle: { backgroundColor: 'deepskyblue', borderWidth: 1, borderBottomColor: 'white' },
+	}
+})
+
+const BlockchainRouter = StackNavigator({
 	Blockchain: {
 		screen: BlockchainScreen,
 		navigationOptions: {
-			title: 'Blockchain',
-			headerTintColor: 'white',
-			headerStyle: { backgroundColor: 'deepskyblue', borderWidth: 1, borderBottomColor: 'white' },
+			headerTitle: 'Blockchain',
 		}
+	}
+}, {
+	navigationOptions: {
+		headerTintColor: 'white',
+		headerStyle: { backgroundColor: 'deepskyblue', borderWidth: 1, borderBottomColor: 'white' },
+	}
+})
+
+const RootRouter = TabNavigator({
+  	MainMenu: {
+		screen: MainRouter,
+
+	},
+	Blockchain: {
+		screen: BlockchainRouter,
 	}
 }, {
 	tabBarOptions: {
@@ -36,24 +61,7 @@ const LoginRouter = TabNavigator({
 		}
 	},
 	tabBarPosition: 'bottom',
-	navigationOptions: {
-		headerTintColor: 'white',
-		headerStyle: { backgroundColor: 'deepskyblue', borderWidth: 1, borderBottomColor: 'white' },
-	}
-})
 
-const RootRouter = StackNavigator({
-  	LoginRoutes: {
-		screen: LoginRouter,
-	},
-	Voting: {
-		screen: VotingScreen,
-		navigationOptions: {
-			title: 'Voting',
-			headerTintColor: 'white',
-			headerStyle: { backgroundColor: 'deepskyblue', borderWidth: 1, borderBottomColor: 'white' },
-		}
-	}
 })
 
 export default class App extends React.Component {

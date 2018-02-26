@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, View, AsyncStorage, Dimensions, TouchableOpacity, Button } from 'react-native';
+import { StyleSheet, Text, View, AsyncStorage, Dimensions, TouchableOpacity, Button, Alert } from 'react-native';
 import { StackNavigator } from 'react-navigation';
 
 const size = Dimensions.get('window').width * 0.4;
@@ -16,7 +16,23 @@ export default class App extends React.Component {
 	}
 
 	submitButtonTapped() {
-		global.addNewTransaction(this.state.pilihan);
+		if (this.state.pilihan != "") {
+			if (global.isConnected) {
+				global.addNewTransaction(this.state.pilihan);
+			} else {
+				Alert.alert(
+					'No Internet Connection',
+					'Please Check Your Internet Connection Then Try Again'
+				)
+			}
+		} else {
+			Alert.alert(
+				'No Candidate Chosen',
+				'Please Choose One Candidate Provided Above'
+			)
+		}
+
+		
 	}
 
 	render() {

@@ -4,6 +4,7 @@ const BC = require('./Blockchain.js');
 const EC = require('elliptic').ec;
 const ec = new EC('secp256k1');
 
+global.isConnected = false;
 global.privKey = ""; 
 global.pubKey = "";
 global.blockchain = new BC.Blockchain()
@@ -47,10 +48,12 @@ var leaderTimeout = 1000;
 
 socket.on('connect', () => {
 	console.log("Connected: " + socket.id);
+	global.isConnected = true;
 	firstTimeRun();
 });
 socket.on('disconnect', () => { 
 	console.log("Disconnected");
+	global.isConnected = false;
 	isFirstTimeSynced = false;
 	isLeader = false;
 });

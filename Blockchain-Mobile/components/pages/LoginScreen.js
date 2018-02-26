@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, TextInput } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, TextInput, Alert } from 'react-native';
 import { NavigationActions } from 'react-navigation';
 
 const CryptoJS = require('crypto-js');
@@ -32,6 +32,18 @@ export default class App extends React.Component {
 		})
 	}
 
+	submitButtonTapped() {
+		if (this.state.address != "") {
+			this.props.navigation.navigate('Voting');
+		} else {
+			Alert.alert(
+				'Address Invalid',
+				'Please Generate Address First Before Login'
+			)
+		}
+		
+	}
+
 	render() {
 		return (
 			<View style={styles.container}>
@@ -45,7 +57,7 @@ export default class App extends React.Component {
 
 				<TouchableOpacity 
 					style={styles.submitButton}
-					onPress={() => {this.props.navigation.navigate('Voting', {address: this.state.idktp});}}>
+					onPress={() => {this.submitButtonTapped()}}>
 					<Text>Submit</Text>
 				</TouchableOpacity>
 				<TouchableOpacity 
