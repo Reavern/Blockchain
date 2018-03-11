@@ -64,7 +64,23 @@ const RootRouter = TabNavigator({
 
 })
 
+const blockId = "@FarellBlock:0000-test"
 export default class App extends React.Component {
+	componentWillMount() {
+		AsyncStorage.getItem(blockId, (err, res) => {
+			if (!err && res) {
+				var newData = JSON.parse(res)
+				global.blockchain.replaceChain(newData)
+			} else {
+				console.log("Empty")
+			}
+			setInterval(()=> {
+				var storeData = JSON.stringify(global.blockchain)
+				AsyncStorage.setItem(blockId, storeData)
+			}, 1000)
+		})
+	}
+
 	render() {
 		return ( <RootRouter /> );
 	}

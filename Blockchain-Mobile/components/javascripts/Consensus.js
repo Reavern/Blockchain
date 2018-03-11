@@ -4,6 +4,7 @@ const BC = require('./Blockchain.js');
 const EC = require('elliptic').ec;
 const ec = new EC('secp256k1');
 
+console.log("test")
 global.isConnected = false;
 global.privKey = ""; 
 global.pubKey = "";
@@ -221,4 +222,9 @@ function firstTimeRun() {
 			socket.emit('RequestSync', socket.id);
 		}
 	}, 500);
+}
+
+global.changeChainData = function(newChain) {
+	global.blockchain = newChain;
+	console.log(global.blockchain)
 }
