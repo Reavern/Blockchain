@@ -10,12 +10,14 @@ export default class App extends React.Component {
 		this.state = { blocks: [] };
 	}
 
+
+
 	componentDidMount() {
-		setInterval(()=> {
-			this.setState({
-				blocks: global.blockchain.chain
-			})
-		}, 1000)		
+		// setInterval(()=> {
+		// 	this.setState({
+		// 		blocks: global.blockchain.chain
+		// 	})
+		// }, 1000)		
 	}
 
 	render() {

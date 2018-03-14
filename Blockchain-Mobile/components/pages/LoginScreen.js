@@ -1,40 +1,38 @@
 import React from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, TextInput, Alert } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, TextInput, Alert, AsyncStorage } from 'react-native';
 import { NavigationActions } from 'react-navigation';
 
-const CryptoJS = require('crypto-js');
-const EC = require('elliptic').ec;
-const ec = new EC('secp256k1');
+const CryptoJS = require('crypto-js')
 
 export default class App extends React.Component {
 
 	constructor(props) {
 		super(props);
-		this.state = { address: "" };
-		this.generatePrivateKey = this.generatePrivateKey.bind(this);
-		this.generateAddress = this.generateAddress.bind(this);
-	}
-
-	generatePrivateKey() {
-		var charset = "0123456789abcdef";
-		var result = "";
-		for( var i=0; i < 32; i++ )
-		        result += charset[Math.floor(Math.random() * charset.length)];
-		return result;
-	}
-
-	generateAddress() {
-		global.privKey = this.generatePrivateKey();
-		var privKey = ec.keyFromPrivate(global.privKey, 'hex');
-		global.pubKey = privKey.getPublic().encode('hex');
-		this.setState({
-			address: global.pubKey
-		})
+		this.state = { 
+			key: "",
+			pass: ""
+		}
 	}
 
 	submitButtonTapped() {
-		if (this.state.address != "") {
-			this.props.navigation.navigate('Voting');
+		if (this.state.key != "" && this.state.pass != "") {
+			AsyncStorage.getItem(global.keystore, (err, res) => {
+				if (!err && res) {
+					var passHash = CryptoJS.SHA256(this.state.key + this.state.pass).toString(CryptoJS.enc.Hex)
+					var keyObj = JSON.parse(res)
+					if (keyObj[this.state.key].pass == passHash) {
+						const resetAction = NavigationActions.reset({
+							index: 0,
+							actions: [NavigationActions.navigate({ routeName: 'MainMenu' })],
+						});
+						this.props.navigation.dispatch(resetAction);
+					} else{
+						console.log(res)
+					}
+				} else {
+
+				}
+			})
 		} else {
 			Alert.alert(
 				'Address Invalid',
@@ -53,7 +51,19 @@ export default class App extends React.Component {
 					autoCorrect={false}
 					underlineColorAndroid='transparent'
 					placeholder="Address"
-					editable={false} />
+					onChangeText={(text) => {
+						this.setState({key: text})
+					}} />
+				<TextInput 
+					style={styles.textInput}
+					value={this.state.pass}
+					autoCorrect={false}
+					underlineColorAndroid='transparent'
+					placeholder="Password"
+					secureTextEntry={true}
+					onChangeText={(text) => {
+						this.setState({pass: text})
+					}} />
 
 				<TouchableOpacity 
 					style={styles.submitButton}
@@ -62,8 +72,8 @@ export default class App extends React.Component {
 				</TouchableOpacity>
 				<TouchableOpacity 
 					style={styles.submitButton}
-					onPress={() => {this.generateAddress()}}>
-					<Text>Generate Address</Text>
+					onPress={() => {this.props.navigation.navigate('Register')}}>
+					<Text>Register</Text>
 				</TouchableOpacity>
 			</View>
 		);
@@ -74,7 +84,6 @@ export default class App extends React.Component {
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
-		backgroundColor: '#009faf',
 		alignItems: 'center',
 		justifyContent: 'center',
 

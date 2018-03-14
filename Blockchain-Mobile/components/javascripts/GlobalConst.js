@@ -1,0 +1,1 @@
+global.keystore = "@FarellBlock:keystore_test"

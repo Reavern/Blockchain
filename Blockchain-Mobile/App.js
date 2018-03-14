@@ -1,86 +1,75 @@
 import React from 'react';
 import { StyleSheet, Text, View, AsyncStorage, Platform } from 'react-native';
-import { StackNavigator, TabNavigator } from 'react-navigation';
+import { StackNavigator, DrawerNavigator } from 'react-navigation';
 import { getStatusBarHeight } from 'react-native-status-bar-height';
 
 import LoginScreen from './components/pages/LoginScreen.js';
 import VotingScreen from './components/pages/VotingScreen.js';
 import BlockchainScreen from './components/pages/BlockchainScreen.js';
+import LogOutScreen from './components/pages/LogOutScreen.js';
+import RegisterScreen from './components/pages/RegisterScreen.js';
 
 import './components/javascripts/Consensus.js'
+import './components/javascripts/GlobalConst.js'
 
-const MainRouter = StackNavigator({
-	Login: {
-		screen: LoginScreen,
-		navigationOptions: {
-			headerTitle: 'Login',
-		}
-	},
+const MainRouter = DrawerNavigator({
+
 	Voting: {
 		screen: VotingScreen,
 		navigationOptions: {
-			headerTitle: 'Voting',
+			drawerLabel: 'Vote',
+			drawerIcon: ({ tintColor }) => (
+				<Text>ASD</Text>
+			),
 		}
-	}
-}, {
-	navigationOptions: {
-		headerTintColor: 'white',
-		headerStyle: { backgroundColor: 'deepskyblue', borderWidth: 1, borderBottomColor: 'white' },
-	}
-})
 
-const BlockchainRouter = StackNavigator({
+	},
 	Blockchain: {
 		screen: BlockchainScreen,
 		navigationOptions: {
-			headerTitle: 'Blockchain',
+			drawerLabel: 'View Blocks',
+			drawerIcon: ({ tintColor }) => (
+				<Text>Home</Text>
+			),
 		}
-	}
-}, {
-	navigationOptions: {
-		headerTintColor: 'white',
-		headerStyle: { backgroundColor: 'deepskyblue', borderWidth: 1, borderBottomColor: 'white' },
+	},
+	LogOut: {
+		screen: LogOutScreen,
+		navigationOptions: {
+			drawerLabel: 'Log Out',
+			drawerIcon: ({ tintColor }) => (
+				<Text>Home</Text>
+			),
+		}
 	}
 })
 
-const RootRouter = TabNavigator({
+var isOpen = false
+const RootRouter = StackNavigator({
+  	Login: {
+		screen: LoginScreen
+	},
+	Register: {
+		screen: RegisterScreen
+	},
   	MainMenu: {
 		screen: MainRouter,
-
+		navigationOptions: ({navigation}) => ({
+			headerLeft: <Text onPress={() => {
+				if (isOpen) {
+					navigation.navigate('DrawerClose')
+				} else {
+					navigation.navigate('DrawerOpen')
+				}
+				isOpen = !isOpen
+			}}>Menu</Text>
+		})
 	},
-	Blockchain: {
-		screen: BlockchainRouter,
-	}
-}, {
-	tabBarOptions: {
-		style: {
-			//backgroundColor: '#41b8f4',
-		},
-		labelStyle: {
-			fontWeight: 'bold'
-		}
-	},
-	tabBarPosition: 'bottom',
 
 })
 
-const blockId = "@FarellBlock:0000-test"
-export default class App extends React.Component {
-	componentWillMount() {
-		AsyncStorage.getItem(blockId, (err, res) => {
-			if (!err && res) {
-				var newData = JSON.parse(res)
-				global.blockchain.replaceChain(newData)
-			} else {
-				console.log("Empty")
-			}
-			setInterval(()=> {
-				var storeData = JSON.stringify(global.blockchain)
-				AsyncStorage.setItem(blockId, storeData)
-			}, 1000)
-		})
-	}
 
+export default class App extends React.Component {
 	render() {
 		return ( <RootRouter /> );
 	}

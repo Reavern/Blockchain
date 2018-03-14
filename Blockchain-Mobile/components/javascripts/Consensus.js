@@ -1,15 +1,32 @@
+import { AsyncStorage } from 'react-native';
+
 const IP_ADDRESS = 'http://192.168.1.252:3000'
 const socket = require('socket.io-client')(IP_ADDRESS);
 const BC = require('./Blockchain.js');
 const EC = require('elliptic').ec;
 const ec = new EC('secp256k1');
 
-console.log("test")
 global.isConnected = false;
 global.privKey = ""; 
 global.pubKey = "";
 global.blockchain = new BC.Blockchain()
 global.blockchain.setGenesisBlock()
+
+const blockId = "@FarellBlock:0000-test"
+AsyncStorage.getItem(blockId, (err, res) => {
+			if (!err && res) {
+				var newData = JSON.parse(res)
+				global.blockchain.replaceChain(newData)
+			} else {
+				console.log("Empty")
+			}
+			setInterval(()=> {
+				var storeData = JSON.stringify(global.blockchain)
+				AsyncStorage.setItem(blockId, storeData)
+			}, 1000)
+		})
+
+
 
 // Helper Function
 function getBlockchainIndex() {

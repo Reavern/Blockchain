@@ -15,6 +15,7 @@ export default class App extends React.Component {
 		}
 	}
 
+	
 	submitButtonTapped() {
 		if (this.state.pilihan != "") {
 			if (global.isConnected) {
