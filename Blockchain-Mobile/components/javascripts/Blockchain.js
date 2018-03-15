@@ -2,98 +2,87 @@ const CryptoJS = require('crypto-js');
 const EC = require('elliptic').ec;
 const ec = new EC('secp256k1');
 
-//const DIFFICULTY = 4;
-export class Block {
-	constructor(index, prevHash, timestamp, data, sender) {
-		this.index = index;
-		this.prevHash = prevHash;
-		this.timestamp = timestamp;
-		this.data = data;
-		this.sender = sender;
-		this.hash = this.generateBlockHash();
-
-		if (this.index != 0) {
-			this.sign = this.signHash();
-		} else {
-			this.sign = "Sign";
-		}
+class Blockchain {
+	constructor() {
+		const genesis = { index: 0, data:"GENESIS BLOCK", hash: "GENESIS" }
+		this.chain = []
+		this.chain.push(genesis)
 	}
-
-	generateBlockHash() {
-		const toBeHashed = this.index + this.prevHash + this.timestamp + this.data + this.sender;
+	getBlockHash(block) {
+		const toBeHashed = block.index + block.prevHash + block.timestamp + block.data + block.sender;
 		const hashedBlock = CryptoJS.SHA256(toBeHashed).toString(CryptoJS.enc.Hex);	
 		return hashedBlock;
 	}
-
-	signHash() {
-		var prKey = ec.keyFromPrivate(global.privKey, 'hex');
-		var signedHash = prKey.sign(this.hash).toDER();
-		var signedString = "[" + signedHash.toString() + "]";
-		return signedString;
+	signHash(hash, key) {
+		const signedHash = key.sign(hash).toDER()
+		const signedString = "[" + signedHash.toString() + "]"
+		return signedString
 	}
+	generateNewBlock(data, privKey) {
+		const index = this.getBlockchainLength()
+		const prevHash = this.getLatestBlock().hash
+		const timestamp = new Date().getTime()
+		const key = ec.keyFromPrivate(privKey, 'hex')
+		const sender = key.getPublic().encode('hex')
 
-}
-
-function getBlockHash(block) {
-	const toBeHashed = block.index + block.prevHash + block.timestamp + block.data + block.sender;
-	const hashedBlock = CryptoJS.SHA256(toBeHashed).toString(CryptoJS.enc.Hex);	
-	return hashedBlock;
-}
-
-const GENESIS_INDEX = 0;
-const GENESIS_PREV_HASH = "0";
-const GENESIS_TIMESTAMP = 0;
-const GENESIS_DATA = "Genesis Block";
-const GENESIS_SENDER = "Sender";
-
-export class Blockchain {
-	constructor() {
-		this.chain = [];
-	}
-
-	setGenesisBlock() {
-		this.chain.push(this.generateGenesisBlock());
-	}
-
-	generateGenesisBlock() {
-		const genesisBlock = new Block(GENESIS_INDEX, GENESIS_PREV_HASH, GENESIS_TIMESTAMP, GENESIS_DATA, GENESIS_SENDER);
-		return genesisBlock;		
-	}
-
-	getLatestBlock() {
-		return this.chain[this.chain.length - 1];
-	}
-	addNewBlock(newBlock) {
-		if (this.isBlockValid(this.getLatestBlock(), newBlock)) {
-			this.chain.push(newBlock);
+		var block = {
+			index: index,
+			prevHash: prevHash,
+			timestamp: timestamp,
+			data: data,
+			sender: sender,
 		}
+		block.hash = this.getBlockHash(block)
+		block.sign = this.signHash(block.hash, key)
+		return block
 	}
-	isBlockValid(prevBlock, nextBlock) {
-		if (prevBlock.index + 1 !== nextBlock.index) {
-
+	checkBlockSign(newBlock) {
+		const pbKey = ec.keyFromPublic(newBlock.sender, 'hex')
+		const signed = JSON.parse(newBlock.sign);
+		const result = pbKey.verify(newBlock.hash, signed);
+		return result
+	}
+	isNewBlockValid(newBlock) {
+		if (this.getBlockchainLength() != newBlock.index) {
 			console.log("Invalid Index !");
 			return false;
-		} else if (prevBlock.hash !== nextBlock.prevHash) {
+		} else if (this.chain[(this.getBlockchainLength() - 1)].hash !== newBlock.prevHash) {
 			console.log("Invalid Previous Hash !");
 			return false;
-		} else if (getBlockHash(nextBlock) !== nextBlock.hash) {
+		} else if (this.getBlockHash(newBlock) !== newBlock.hash) {
 			console.log("Invalid Hash !");
 			return false;
-		} else {
+		} else if (!this.checkBlockSign(newBlock)) {
+			console.log("Invalid Sign")
+			return false
+		}else {
 			return true;
-		}		
+		}
+
+	}
+	addNewBlock(newBlock) {
+		if (this.isNewBlockValid(newBlock)) {
+			this.chain.push(newBlock)
+			console.log(newBlock)
+		} else {
+			console.log("Invalid New Block")
+		}
 	}
 
-	replaceChain(blockchain) {
-		this.chain = blockchain.chain;
-	}
-
-	generateNextBlock(nextData, nextSender, nextTimestamp) {
-		const prevBlock = this.getLatestBlock();
-		const nextIndex = prevBlock.index + 1;
-
-		const nextBlock = new Block(nextIndex, prevBlock.hash, nextTimestamp, nextData, nextSender)
-
-		return nextBlock;
-	}
+	getLatestBlock() 		{ return this.chain[(this.chain.length - 1)] }
+	replaceChain(data)		{ this.chain = data.chain }
+	getBlockchainLength()	{ return this.chain.length }
 }
+
+class MainChain {
+	constructor() {
+		this.main = {
+			transactions: new Blockchain(),
+			contracts: new Blockchain()
+		}
+	}
+	getContractsLength() { return this.main.contracts.getBlockchainLength() }
+	getTransactionsLength() { return this.main.transactions.getBlockchainLength()  }
+}
+
+module.exports = MainChain

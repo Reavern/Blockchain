@@ -9,8 +9,8 @@ export default class App extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = { 
-			key: "",
-			pass: ""
+			key: "5b6373776ad233c35729747b8342f17c",
+			pass: "asd"
 		}
 	}
 
@@ -25,7 +25,12 @@ export default class App extends React.Component {
 							index: 0,
 							actions: [NavigationActions.navigate({ routeName: 'MainMenu' })],
 						});
-						this.props.navigation.dispatch(resetAction);
+						const loggedInString = JSON.stringify(keyObj[this.state.key])
+						AsyncStorage.setItem(global.loggedIn, loggedInString, () => {
+							this.props.navigation.dispatch(resetAction);
+						})
+
+						
 					} else{
 						console.log(res)
 					}
@@ -47,7 +52,7 @@ export default class App extends React.Component {
 			<View style={styles.container}>
 				<TextInput 
 					style={styles.textInput}
-					value={this.state.address}
+					value={this.state.key}
 					autoCorrect={false}
 					underlineColorAndroid='transparent'
 					placeholder="Address"

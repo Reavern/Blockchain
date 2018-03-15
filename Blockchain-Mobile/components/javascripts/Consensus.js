@@ -2,37 +2,14 @@ import { AsyncStorage } from 'react-native';
 
 const IP_ADDRESS = 'http://192.168.1.252:3000'
 const socket = require('socket.io-client')(IP_ADDRESS);
-const BC = require('./Blockchain.js');
+const Blockchain = require('./Blockchain.js');
 const EC = require('elliptic').ec;
 const ec = new EC('secp256k1');
 
 global.isConnected = false;
-global.privKey = ""; 
-global.pubKey = "";
-global.blockchain = new BC.Blockchain()
-global.blockchain.setGenesisBlock()
-
-const blockId = "@FarellBlock:0000-test"
-AsyncStorage.getItem(blockId, (err, res) => {
-			if (!err && res) {
-				var newData = JSON.parse(res)
-				global.blockchain.replaceChain(newData)
-			} else {
-				console.log("Empty")
-			}
-			setInterval(()=> {
-				var storeData = JSON.stringify(global.blockchain)
-				AsyncStorage.setItem(blockId, storeData)
-			}, 1000)
-		})
-
-
+var blockchain = new Blockchain()
 
 // Helper Function
-function getBlockchainIndex() {
-	return global.blockchain.chain.length;
-}
-
 function verifyMessage(msg, sign, key) {
 	var pbKey = ec.keyFromPublic(key, 'hex')
 	var signed = JSON.parse(sign);
@@ -51,7 +28,8 @@ var isLeader = false;
 var isPooling = false;
 var votedFor = "";
 var blockPool = [];
-var currentPool = "";
+var currentPoolData = "";
+var currentPoolType = "";
 
 // First Time State
 var hasLeader = false;
@@ -79,21 +57,20 @@ socket.on('disconnect', () => {
 // Request Vote
 function requestVote() {
 	voteResult = [];
-	socket.emit('RequestVote', socket.id, global.blockchain.chain.length)
+	socket.emit('RequestVote', socket.id, blockchain.getTransactionsLength())
 	leaderTimeout = randomTimeout();
 	resetLeaderTimeout();
 }
-
 function checkResult(connectedUsers, resultArray) {
-	var halfUsers = Math.floor(connectedUsers / 2);
+	var halfUsers = Math.ceil(connectedUsers / 2);
 	var trueCount = 0;
 	for (var x = 0; x < resultArray.length; x++) {
 		if (resultArray[x]) {
 			trueCount++;
 		}
 	}
-	console.log("users: " + halfUsers)
-	console.log("true: " + trueCount)
+	console.log("Users: " + connectedUsers)
+	console.log("True: " + trueCount)
 	if (trueCount >= halfUsers) {
 		return true;
 	} else {
@@ -102,21 +79,23 @@ function checkResult(connectedUsers, resultArray) {
 }
 
 socket.on('LeaderVoteResult', (result, connectedUsers) => {
-	voteResult.push(result);
+	voteResult.push(result)
 	if (checkResult(connectedUsers, voteResult)) {
-		console.log("I'm Elected");
-		socket.emit('Elected', socket.id);
-		isLeader = true;
-		
+		console.log("I'm Elected")
+		socket.emit('Elected', socket.id)
+		isLeader = true
 	}
 });
 
 socket.on('DoVote', (candidateId, index) => {
-	if ((index >= global.blockchain.chain.length && votedFor == "") || votedFor == candidateId) {
-		socket.emit('VoteForCandidate', candidateId, true);
-		votedFor = candidateId;
+	if ((index >= blockchain.getTransactionsLength() && votedFor == "") || votedFor == candidateId) {
+		socket.emit('VoteForCandidate', candidateId, true)
+		votedFor = candidateId
+	} else if (candidateId == socket.id) {
+		socket.emit('VoteForCandidate', candidateId, true)
+		votedFor = candidateId
 	} else {
-		socket.emit('VoteForCandidate', candidateId, false);
+		socket.emit('VoteForCandidate', candidateId, false)
 	}
 });
 
@@ -129,28 +108,34 @@ socket.on('NewLeaderElected', () => {
 
 // Sync
 socket.on('SyncListener', (chain, pool) => {
-	const newBlockchain = JSON.parse(chain);
+	const newBlockchain = JSON.parse(chain)
 	blockPool = pool;
-	global.blockchain.replaceChain(newBlockchain);
-	isFirstTimeSynced = true;
-	clearTimeout(setTimeoutFirstTime);
+
+	blockchain.main.transactions.replaceChain(newBlockchain.transactions)
+	blockchain.main.contracts.replaceChain(newBlockchain.contracts)
+
+	const storeData = JSON.stringify(blockchain.main)
+	AsyncStorage.setItem(global.blockchain, storeData)
+
+	isFirstTimeSynced = true
+	clearTimeout(setTimeoutFirstTime)
 	console.log("Blockchain Synced!")
 })
 // Leader Send Sync
 socket.on('SyncRequest', (userId) => {
-	const syncData = JSON.stringify(global.blockchain)
-	socket.emit('SendSync', syncData, blockPool, userId);
-	console.log("Sync Sent To: " + userId);
+	const syncData = JSON.stringify(blockchain.main)
+	socket.emit('SendSync', syncData, blockPool, userId)
+	console.log("Sync Sent To: " + userId)
 })
 
 // Hearbeat
 function resetLeaderTimeout() {
-	voteResult = [];
-	votedFor = "";
-	clearTimeout(setTimeoutLeader);
+	voteResult = []
+	votedFor = ""
+	clearTimeout(setTimeoutLeader)
 	setTimeoutLeader = setTimeout(() => {
 		console.log("Leader Election By: " + socket.id)
-		requestVote();
+		requestVote()
 	}, leaderTimeout)	
 }
 
@@ -175,25 +160,27 @@ function resetPoolTimeout() {
 }
 function processPooledData() {
 	if (isLeader && blockPool.length != 0) {
-		isPooling = true;
-		currentPool = blockPool[0];
-		socket.emit('ProcessPool', blockPool[0]);
+		isPooling = true
+		currentPoolData = JSON.stringify(blockPool[0].block)
+		currentPoolType = blockPool[0].type
+		socket.emit('ProcessPool', blockPool[0].block, blockPool[0].type)
 	}
 }
-global.addNewTransaction = function(nextData) {
-	const nextSender = global.pubKey;
-	const nextTimestamp = new Date().getTime();
-	const nextBlock = global.blockchain.generateNextBlock(nextData, nextSender, nextTimestamp);
-	const nextBlockString = JSON.stringify(nextBlock);
-	socket.emit('AddDataToPool', nextBlockString);
-}
 
-socket.on('DataToVote', (block) => { // All
+
+socket.on('DataToVote', (block, type) => { // All
 	isPooling = true;
-	const newBlock = JSON.parse(block);
-	const keyValid = verifyMessage(newBlock.hash, newBlock.sign, newBlock.sender);
-	const latestBlock = global.blockchain.getLatestBlock();
-	const blockValid = global.blockchain.isBlockValid(latestBlock ,newBlock);
+	const newBlock = JSON.parse(block)
+	const keyValid = verifyMessage(newBlock.hash, newBlock.sign, newBlock.sender)
+	var latestBlock, blockValid
+
+	if (type == "TRANSACTIONS") {
+		latestBlock = blockchain.main.transactions.getLatestBlock()
+		blockValid = blockchain.main.transactions.isNewBlockValid(newBlock)
+	} else if (type == "CONTRACTS") {
+		latestBlock = blockchain.main.contracts.getLatestBlock()
+		blockValid = blockchain.main.contracts.isNewBlockValid(newBlock)
+	}
 	var result = false;
 	if (keyValid && blockValid) {
 		result = true;
@@ -206,10 +193,11 @@ socket.on('DataVoteResult', (result, connectedUsers) => { // Leader
 	clearTimeout(setTimeoutProcess);
 	setTimeoutProcess = setTimeout(() => {
 		if (checkResult(connectedUsers, dataVoteResult)) {
-			socket.emit('CommitData', currentPool);
+			socket.emit('CommitData', currentPoolData, currentPoolType)
 		} else {
 			socket.emit('RemoveData');
 		}
+		dataVoteResult = []
 	}, 1000)
 });
 
@@ -218,16 +206,26 @@ socket.on('DataToRemove', () => { // All
 	isPooling = false;
 })
 
-socket.on('DataToCommit', (block) => { // All
-	const newBlock = JSON.parse(block);
-	global.blockchain.addNewBlock(newBlock);
-	console.log(global.blockchain)
+socket.on('DataToCommit', (pool, type) => { // All
+	const newBlock = JSON.parse(pool)
+	console.log(newBlock["index"])
+	if (type == "TRANSACTIONS") {
+		blockchain.main.transactions.addNewBlock(newBlock)
+	} else if (type == "CONTRACTS") {
+		blockchain.main.contracts.addNewBlock(newBlock)
+	} else {
+		console.log("No Type")
+	}
+	const storeData = JSON.stringify(blockchain.main)
+	AsyncStorage.setItem(global.blockchain, storeData)
+
 	blockPool.splice(0, 1);
 	isPooling = false;
+	console.log("COMMITED")
 });
 
-socket.on('DataToPool', (block) => {
-	blockPool.push(block);
+socket.on('DataToPool', (block, type) => {
+	blockPool.push({block: block, type: type});
 })
 
 // First Time Run
@@ -241,7 +239,16 @@ function firstTimeRun() {
 	}, 500);
 }
 
-global.changeChainData = function(newChain) {
-	global.blockchain = newChain;
-	console.log(global.blockchain)
+
+// Global Function
+global.addNewTransaction = function(nextData, key) {
+	const nextBlock = blockchain.main.transactions.generateNewBlock(nextData, key);
+	const nextBlockString = JSON.stringify(nextBlock);
+	socket.emit('AddDataToPool', nextBlockString, "TRANSACTIONS");
+}
+
+global.addNewContracts = function(nextData, key) {
+	const nextBlock = blockchain.main.contracts.generateNewBlock(nextData, key)
+	const nextBlockString = JSON.stringify(nextBlock)
+	socket.emit('AddDataToPool', nextBlockString, "CONTRACTS")
 }

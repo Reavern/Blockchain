@@ -47,19 +47,19 @@ io.on('connection', (socket) => {
 	})
 
 	// Append
-	socket.on('AddDataToPool', (nextBlock) => {
-		io.emit('DataToPool', nextBlock);
+	socket.on('AddDataToPool', (nextBlock, type) => {
+		io.emit('DataToPool', nextBlock, type);
 	})
-	socket.on('ProcessPool', (block) => {
-		io.emit('DataToVote', block);
+	socket.on('ProcessPool', (block, type) => {
+		io.emit('DataToVote', block, type);
 	})
 	socket.on('VoteForData', (result) => {
 		if(users[leader] != undefined) {
 			users[leader].emit('DataVoteResult', result, connectedUsers)
 		}
 	})
-	socket.on('CommitData', (block) => {
-		io.emit('DataToCommit', block);
+	socket.on('CommitData', (pool, type) => {
+		io.emit('DataToCommit', pool, type);
 	})
 	socket.on('RemoveData', () => {
 		io.emit('DataToRemove');
