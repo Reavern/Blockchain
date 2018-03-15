@@ -61,9 +61,10 @@ class Blockchain {
 
 	}
 	addNewBlock(newBlock) {
+		console.log(newBlock)
 		if (this.isNewBlockValid(newBlock)) {
 			this.chain.push(newBlock)
-			console.log(newBlock)
+			
 		} else {
 			console.log("Invalid New Block")
 		}

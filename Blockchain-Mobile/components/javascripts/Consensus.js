@@ -109,7 +109,7 @@ socket.on('NewLeaderElected', () => {
 // Sync
 socket.on('SyncListener', (chain, pool) => {
 	const newBlockchain = JSON.parse(chain)
-	blockPool = pool;
+	blockPool = JSON.parse(pool);
 
 	blockchain.main.transactions.replaceChain(newBlockchain.transactions)
 	blockchain.main.contracts.replaceChain(newBlockchain.contracts)
@@ -124,7 +124,7 @@ socket.on('SyncListener', (chain, pool) => {
 // Leader Send Sync
 socket.on('SyncRequest', (userId) => {
 	const syncData = JSON.stringify(blockchain.main)
-	socket.emit('SendSync', syncData, blockPool, userId)
+	socket.emit('SendSync', syncData, JSON.stringify(blockPool), userId)
 	console.log("Sync Sent To: " + userId)
 })
 
@@ -161,9 +161,9 @@ function resetPoolTimeout() {
 function processPooledData() {
 	if (isLeader && blockPool.length != 0) {
 		isPooling = true
-		currentPoolData = JSON.stringify(blockPool[0].block)
+		currentPoolData = blockPool[0].block
 		currentPoolType = blockPool[0].type
-		socket.emit('ProcessPool', blockPool[0].block, blockPool[0].type)
+		socket.emit('ProcessPool', currentPoolData, currentPoolType)
 	}
 }
 
@@ -208,7 +208,6 @@ socket.on('DataToRemove', () => { // All
 
 socket.on('DataToCommit', (pool, type) => { // All
 	const newBlock = JSON.parse(pool)
-	console.log(newBlock["index"])
 	if (type == "TRANSACTIONS") {
 		blockchain.main.transactions.addNewBlock(newBlock)
 	} else if (type == "CONTRACTS") {
@@ -218,7 +217,7 @@ socket.on('DataToCommit', (pool, type) => { // All
 	}
 	const storeData = JSON.stringify(blockchain.main)
 	AsyncStorage.setItem(global.blockchain, storeData)
-
+	console.log(blockchain.main.contracts)
 	blockPool.splice(0, 1);
 	isPooling = false;
 	console.log("COMMITED")
