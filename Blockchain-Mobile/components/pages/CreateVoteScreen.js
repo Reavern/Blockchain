@@ -7,7 +7,8 @@ export default class App extends React.Component {
 		this.state = {
 			voteId: "",
 			candidate1: "",
-			candidate2: ""
+			candidate2: "",
+			limit: ""
 		}
 	}
 
@@ -15,7 +16,8 @@ export default class App extends React.Component {
 		const candidateArray = [this.state.candidate1, this.state.candidate2]
 		const voteData = {
 			voteId: this.state.voteId,
-			candidates: candidateArray
+			limit: this.state.limit,
+			candidates: candidateArray,
 		}
 		AsyncStorage.getItem(global.loggedIn, (err, res) => {
 			if (!err && res) {
@@ -32,9 +34,9 @@ export default class App extends React.Component {
 	render() {
 		return (
 			<View style={styles.container}>
-
+			<View style={styles.containerHalf}>
 				<TextInput 
-					style={styles.textInput}
+					style={styles.textInputHalf}
 					value={this.state.voteId}
 					autoCorrect={false}
 					underlineColorAndroid='transparent'
@@ -42,6 +44,18 @@ export default class App extends React.Component {
 					onChangeText={(text) => {
 						this.setState({voteId: text})
 					}}/>
+				<TextInput 
+					style={styles.textInputHalf}
+					value={this.state.limit}
+					autoCorrect={false}
+					underlineColorAndroid='transparent'
+					placeholder="Vote Limit"
+					keyboardType="numeric"
+					onChangeText={(text) => {
+						this.setState({limit: text})
+					}}/>
+					</View>
+				
 				<TextInput 
 					style={styles.textInput}
 					value={this.state.candidate1}
@@ -79,10 +93,22 @@ const styles = StyleSheet.create({
 		justifyContent: 'center',
 
 	},
+	containerHalf: {
+		flexDirection: 'row',
+		alignItems: 'center',
+		justifyContent: 'center',
+	},
 	textInput: {
 		height: 40,
 		width: '70%',
 		marginTop: 10,
+		paddingHorizontal: 10,
+		backgroundColor: '#FFF'
+	},
+	textInputHalf: {
+		height: 40,
+		width: '33%',
+		margin: 9,
 		paddingHorizontal: 10,
 		backgroundColor: '#FFF'
 	},

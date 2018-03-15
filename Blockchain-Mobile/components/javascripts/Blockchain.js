@@ -4,7 +4,7 @@ const ec = new EC('secp256k1');
 
 class Blockchain {
 	constructor() {
-		const genesis = { index: 0, data:"GENESIS BLOCK", hash: "GENESIS" }
+		const genesis = { index: 0, data:{voteId:"none"}, hash: "GENESIS" }
 		this.chain = []
 		this.chain.push(genesis)
 	}

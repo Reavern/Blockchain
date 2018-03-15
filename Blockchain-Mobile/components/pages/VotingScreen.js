@@ -28,12 +28,48 @@ export default class App extends React.Component {
 		super(props);
 		this.state = {
 			voteId: "",
+			voteData: {},
 			modalVisible: false
 		}
 	}
 
 	toggleModal(visibility) {
-		this.setState({ modalVisible: visibility})
+		AsyncStorage.getItem(global.blockchain, (err, res) => {
+			if (!err && res) {
+				const contractData = JSON.parse(res).contracts.chain
+				const transactionList = JSON.parse(res).transactions.chain
+
+				var transactionCount = 0;
+				var contract = {}
+
+				for (var x = 0; x < contractData.length; x++) {
+					if (contractData[x].data.voteId === this.state.voteId) {
+						console.log(true)
+						for (var y = 0; y < transactionList.length; y++) {
+
+							if (transactionList[y].data.voteId === this.state.voteId) {
+								transactionCount++
+							}
+						}
+						if (transactionCount > contractData[x].data.limit) {
+							console.log("Limit Reached")
+						} else {
+							this.setState({ modalVisible: visibility })
+						}
+						
+						break
+					} else {
+
+					}
+				}
+
+
+				
+			} else {
+				console.log("Error")
+			}
+		})
+		
 	}
 
 	render() {

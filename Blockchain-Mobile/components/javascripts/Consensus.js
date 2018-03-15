@@ -115,11 +115,13 @@ socket.on('SyncListener', (chain, pool) => {
 	blockchain.main.contracts.replaceChain(newBlockchain.contracts)
 
 	const storeData = JSON.stringify(blockchain.main)
-	AsyncStorage.setItem(global.blockchain, storeData)
+	AsyncStorage.setItem(global.blockchain, storeData, () => {
+		isFirstTimeSynced = true
+		clearTimeout(setTimeoutFirstTime)
+		console.log("Blockchain Synced!")	
+	})
 
-	isFirstTimeSynced = true
-	clearTimeout(setTimeoutFirstTime)
-	console.log("Blockchain Synced!")
+
 })
 // Leader Send Sync
 socket.on('SyncRequest', (userId) => {
@@ -216,11 +218,12 @@ socket.on('DataToCommit', (pool, type) => { // All
 		console.log("No Type")
 	}
 	const storeData = JSON.stringify(blockchain.main)
-	AsyncStorage.setItem(global.blockchain, storeData)
-	console.log(blockchain.main.contracts)
-	blockPool.splice(0, 1);
-	isPooling = false;
-	console.log("COMMITED")
+	AsyncStorage.setItem(global.blockchain, storeData, () => {
+		blockPool.splice(0, 1);
+		isPooling = false;
+		console.log("COMMITED")		
+	})
+
 });
 
 socket.on('DataToPool', (block, type) => {
@@ -229,11 +232,11 @@ socket.on('DataToPool', (block, type) => {
 
 // First Time Run
 function firstTimeRun() {
-	resetLeaderTimeout();
-	resetPoolTimeout();
+	resetLeaderTimeout()
+	resetPoolTimeout()
 	setTimeoutFirstTime = setInterval(() => {
 		if (hasLeader && !isFirstTimeSynced) {
-			socket.emit('RequestSync', socket.id);
+			socket.emit('RequestSync', socket.id)
 		}
 	}, 500);
 }

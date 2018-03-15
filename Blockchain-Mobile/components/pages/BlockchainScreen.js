@@ -1,64 +1,117 @@
 import React from 'react';
-import { StyleSheet, Text, View, FlatList, Dimensions } from 'react-native';
+import { Modal, StyleSheet, Text, View, AsyncStorage, TextInput, TouchableHighlight, TouchableOpacity, Button, Alert } from 'react-native';
 
-const width = Dimensions.get('window').width * 0.9;
+class BlockchainModal extends React.Component {
+
+	render() {
+		return (
+			<Modal
+				animationType="slide"
+				transparent={false}
+				visible={this.props.visible}
+				onRequestClose={() => {
+					this.props.onBack()
+				}}>
+				<TouchableOpacity 
+					onPress={() => {
+						this.props.onBack()
+					}}>
+					<Text>{this.props.voteId}</Text>
+				</TouchableOpacity>
+			</Modal>
+		)
+	}
+}
 
 export default class App extends React.Component {
-
 	constructor(props) {
 		super(props);
-		this.state = { blocks: [] };
+		this.state = {
+			voteId: "",
+			voteData: [],
+			modalVisible: false
+		}
 	}
 
+	toggleModal(visibility) {
+		AsyncStorage.getItem(global.blockchain, (err, res) => {
+			if (!err && res) {
+				const contractData = JSON.parse(res).contracts.chain
+				const transactionList = JSON.parse(res).transactions.chain
 
+				var transactionCount = 0;
+				var contract = {}
+				var data = []
 
-	componentDidMount() {
+				for (var x = 0; x < contractData.length; x++) {
+					if (contractData[x].data.voteId === this.state.voteId) {
+						data.push(contractData[x])
+					}
+				}
 
+				this.setState({
+					voteData: data
+				})
+				console.log(data)
+				
+			} else {
+				console.log("Error")
+			}
+		})
+		
 	}
 
 	render() {
 		return (
 			<View style={styles.container}>
-				<FlatList
-					data={this.state.blocks}
-					extraData={this.state}
-					renderItem={ ({item}) => 
-						<View style={styles.sectionBack}>
-							<Text
-								style={styles.sectionItem}>
-								{ item.data }
-							</Text>
-						</View>
-					}
-					keyExtractor={(item, index) => index}
-				/>
+				<BlockchainModal 
+				visible={this.state.modalVisible}
+				onBack={() => {this.toggleModal(false)}} 
+				voteData={this.state.voteData}/>
+
+				<TextInput 
+					style={styles.textInput}
+					value={this.state.voteId}
+					autoCorrect={false}
+					underlineColorAndroid='transparent'
+					placeholder="Vote ID"
+					onChangeText={(text) => {
+						this.setState({voteId: text})
+					}}/>
+				<TouchableOpacity 
+					style={styles.submitButton}
+					onPress={() => {
+						this.toggleModal(true)
+					}}>
+					<Text>Submit</Text>
+				</TouchableOpacity>
 			</View>
-		);
+		)
 	}
 }
 
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
-		// backgroundColor: '#fff',
-		justifyContent: 'center',
-		flexDirection: 'column',
 		alignItems: 'center',
+		justifyContent: 'center',
+
 	},
-	sectionBack: {
-		//alignItems: 'center',
-		backgroundColor: '#FFF',
-		marginTop: 20,
+	textInput: {
 		height: 40,
-		width: width,
-		borderWidth: 0.5,
-		borderColor: '#000',
+		width: '70%',
+		marginTop: 10,
+		paddingHorizontal: 10,
+		backgroundColor: '#FFF'
 	},
-	sectionItem: {
-
-		fontSize: 18,
-		
-		textAlign: 'center',
-
+	submitButton: {
+		height: 40,
+		width: '70%',
+		marginTop: 10,
+		backgroundColor: '#b1d8e0',
+		alignItems: 'center',
+		justifyContent: 'center'
 	}
 });
+
+
