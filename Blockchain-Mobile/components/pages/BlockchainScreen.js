@@ -1,27 +1,6 @@
 import React from 'react';
 import { Modal, StyleSheet, Text, View, AsyncStorage, TextInput, TouchableHighlight, TouchableOpacity, Button, Alert } from 'react-native';
-
-class BlockchainModal extends React.Component {
-
-	render() {
-		return (
-			<Modal
-				animationType="slide"
-				transparent={false}
-				visible={this.props.visible}
-				onRequestClose={() => {
-					this.props.onBack()
-				}}>
-				<TouchableOpacity 
-					onPress={() => {
-						this.props.onBack()
-					}}>
-					<Text>{this.props.voteId}</Text>
-				</TouchableOpacity>
-			</Modal>
-		)
-	}
-}
+import Icon from 'react-native-vector-icons/Entypo';
 
 export default class App extends React.Component {
 	constructor(props) {
@@ -29,31 +8,41 @@ export default class App extends React.Component {
 		this.state = {
 			voteId: "",
 			voteData: [],
-			modalVisible: false
+			modalVisible: false,
+			transactions: [],
+			transactionCount: 0
 		}
 	}
 
 	toggleModal(visibility) {
+		this.setState({ modalVisible: visibility })
+	}
+
+	submitButtonTaped() {
 		AsyncStorage.getItem(global.blockchain, (err, res) => {
 			if (!err && res) {
 				const contractData = JSON.parse(res).contracts.chain
 				const transactionList = JSON.parse(res).transactions.chain
 
 				var transactionCount = 0;
-				var contract = {}
-				var data = []
+				var transactions = []
 
 				for (var x = 0; x < contractData.length; x++) {
 					if (contractData[x].data.voteId === this.state.voteId) {
-						data.push(contractData[x])
+						for (var y = 0; y < transactionList.length; y++) {
+							if (transactionList[y].data.voteId === this.state.voteId) {
+								transactionCount++
+								transactions.push(transactionList[y].data)
+							}
+						}
+						this.setState({
+							transactions: transactions,
+							transactionCount: transactionCount
+						})
+						this.toggleModal(true)
+						break
 					}
 				}
-
-				this.setState({
-					voteData: data
-				})
-				console.log(data)
-				
 			} else {
 				console.log("Error")
 			}
@@ -64,10 +53,21 @@ export default class App extends React.Component {
 	render() {
 		return (
 			<View style={styles.container}>
-				<BlockchainModal 
-				visible={this.state.modalVisible}
-				onBack={() => {this.toggleModal(false)}} 
-				voteData={this.state.voteData}/>
+				<Modal
+					animationType="slide"
+					transparent={false}
+					visible={this.state.modalVisible}
+					onRequestClose={() => { this.toggleModal(false) }}>
+					<TouchableOpacity 
+						onPress={() => { this.toggleModal(false) }}>
+						<Icon name="chevron-left" size={40} color="black" style={{margin: 5}}/>
+					</TouchableOpacity>
+					<View style={styles.container}>
+						<Text>{this.state.transactionCount}</Text>
+
+					</View>
+				</Modal>
+
 
 				<TextInput 
 					style={styles.textInput}
@@ -81,7 +81,7 @@ export default class App extends React.Component {
 				<TouchableOpacity 
 					style={styles.submitButton}
 					onPress={() => {
-						this.toggleModal(true)
+						this.submitButtonTaped()
 					}}>
 					<Text>Submit</Text>
 				</TouchableOpacity>

@@ -22,7 +22,7 @@ export default class App extends React.Component {
 		AsyncStorage.getItem(global.loggedIn, (err, res) => {
 			if (!err && res) {
 				const data = JSON.parse(res)
-				global.addNewContracts(voteData, data.privKey)
+				global.addNewContract(voteData, data.privKey)
 
 			} else {
 				console.log("ERROR")
@@ -34,26 +34,26 @@ export default class App extends React.Component {
 	render() {
 		return (
 			<View style={styles.container}>
-			<View style={styles.containerHalf}>
-				<TextInput 
-					style={styles.textInputHalf}
-					value={this.state.voteId}
-					autoCorrect={false}
-					underlineColorAndroid='transparent'
-					placeholder="Vote ID"
-					onChangeText={(text) => {
-						this.setState({voteId: text})
-					}}/>
-				<TextInput 
-					style={styles.textInputHalf}
-					value={this.state.limit}
-					autoCorrect={false}
-					underlineColorAndroid='transparent'
-					placeholder="Vote Limit"
-					keyboardType="numeric"
-					onChangeText={(text) => {
-						this.setState({limit: text})
-					}}/>
+				<View style={styles.containerHalf}>
+					<TextInput 
+						style={styles.textInputHalf}
+						value={this.state.voteId}
+						autoCorrect={false}
+						underlineColorAndroid='transparent'
+						placeholder="Vote ID"
+						onChangeText={(text) => {
+							this.setState({voteId: text})
+						}}/>
+					<TextInput 
+						style={styles.textInputHalf}
+						value={this.state.limit}
+						autoCorrect={false}
+						underlineColorAndroid='transparent'
+						placeholder="Vote Limit"
+						keyboardType="numeric"
+						onChangeText={(text) => {
+							this.setState({limit: text})
+						}}/>
 					</View>
 				
 				<TextInput 

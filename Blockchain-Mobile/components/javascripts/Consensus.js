@@ -234,11 +234,19 @@ socket.on('DataToPool', (block, type) => {
 function firstTimeRun() {
 	resetLeaderTimeout()
 	resetPoolTimeout()
-	setTimeoutFirstTime = setInterval(() => {
-		if (hasLeader && !isFirstTimeSynced) {
-			socket.emit('RequestSync', socket.id)
+	AsyncStorage.getItem(global.blockchain, (err, res) => {
+		if (!err && res) {
+			const storedBlockchain = JSON.parse(res)
+			blockchain.main.transactions.replaceChain(storedBlockchain.transactions)
+			blockchain.main.contracts.replaceChain(storedBlockchain.contracts)
 		}
-	}, 500);
+
+		setTimeoutFirstTime = setInterval(() => {
+			if (hasLeader && !isFirstTimeSynced) {
+				socket.emit('RequestSync', socket.id)
+			}
+		}, 500);
+	})
 }
 
 
@@ -249,7 +257,7 @@ global.addNewTransaction = function(nextData, key) {
 	socket.emit('AddDataToPool', nextBlockString, "TRANSACTIONS");
 }
 
-global.addNewContracts = function(nextData, key) {
+global.addNewContract = function(nextData, key) {
 	const nextBlock = blockchain.main.contracts.generateNewBlock(nextData, key)
 	const nextBlockString = JSON.stringify(nextBlock)
 	socket.emit('AddDataToPool', nextBlockString, "CONTRACTS")
