@@ -1,5 +1,5 @@
 import React from 'react';
-import { Modal, StyleSheet, Text, View, AsyncStorage, TextInput, TouchableHighlight, TouchableOpacity, Button, Alert } from 'react-native';
+import { Modal, StyleSheet, Text, View, AsyncStorage, TextInput, TouchableOpacity, Alert, FlatList } from 'react-native';
 import Icon from 'react-native-vector-icons/Entypo';
 
 export default class App extends React.Component {
@@ -7,7 +7,7 @@ export default class App extends React.Component {
 		super(props);
 		this.state = {
 			voteId: "",
-			voteData: [],
+			contractData: [],
 			modalVisible: false,
 			transactions: [],
 			transactionCount: 0
@@ -29,6 +29,7 @@ export default class App extends React.Component {
 
 				for (var x = 0; x < contractData.length; x++) {
 					if (contractData[x].data.voteId === this.state.voteId) {
+						this.setState({ contractData: contractData[x] })
 						for (var y = 0; y < transactionList.length; y++) {
 							if (transactionList[y].data.voteId === this.state.voteId) {
 								transactionCount++
@@ -39,6 +40,7 @@ export default class App extends React.Component {
 							transactions: transactions,
 							transactionCount: transactionCount
 						})
+						console.log(this.state.transactions)
 						this.toggleModal(true)
 						break
 					}
@@ -58,13 +60,42 @@ export default class App extends React.Component {
 					transparent={false}
 					visible={this.state.modalVisible}
 					onRequestClose={() => { this.toggleModal(false) }}>
-					<TouchableOpacity 
-						onPress={() => { this.toggleModal(false) }}>
-						<Icon name="chevron-left" size={40} color="black" style={{margin: 5}}/>
-					</TouchableOpacity>
+					<View style={styles.containerRow}>
+						<View style={{alignItems: 'flex-start', justifyContent: 'center', flex:0.5}}>
+							<TouchableOpacity
+							onPress={() => { this.toggleModal(false) }}>
+								<Icon name="chevron-left" size={40} color="black" style={{margin: 5}}/>
+						</TouchableOpacity>
+						</View>
+						
+						<View style={{alignItems: 'center', justifyContent: 'center', flex:1}}>
+							<Text style={styles.headerText}>
+								{this.state.voteId}{"\n"}Total Vote Count: {this.state.transactionCount}
+							</Text>
+						</View>
+						<View style={{alignItems: 'flex-end', justifyContent: 'center', flex:0.5}}>
+							<TouchableOpacity
+							onPress={() => { this.submitButtonTaped() }}>
+								<Icon name="cw" size={40} color="black" style={{margin: 5}}/>
+							</TouchableOpacity>
+						</View>
+					</View>
 					<View style={styles.container}>
-						<Text>{this.state.transactionCount}</Text>
+							<FlatList
+								style={{width: '100%'}}
+								data={this.state.transactions}
+								extraData={this.state}
+								renderItem={ ({item}) => 
+									<View style={styles.sectionBack}>
+										<Text
+											style={styles.sectionItem}>
+											{ item.choice }
+										</Text>
+									</View>
+								}
+								keyExtractor={(item, index) => index} />
 
+						
 					</View>
 				</Modal>
 
@@ -95,7 +126,10 @@ const styles = StyleSheet.create({
 		flex: 1,
 		alignItems: 'center',
 		justifyContent: 'center',
-
+		backgroundColor: '#F0EFF5'
+	},
+	containerRow: {
+		flexDirection: 'row',
 	},
 	textInput: {
 		height: 40,
@@ -111,6 +145,28 @@ const styles = StyleSheet.create({
 		backgroundColor: '#b1d8e0',
 		alignItems: 'center',
 		justifyContent: 'center'
+	},
+	sectionBack: {
+		flex: 1,
+		backgroundColor: '#FFF',
+		marginTop: 20,
+		height: 40,
+		width: '70%',
+		borderWidth: 0.7,
+		borderColor: '#000',
+		alignSelf: 'center',
+		alignItems: 'center',
+		justifyContent: 'center'
+	},
+	sectionItem: {
+		alignSelf: 'stretch',
+		fontSize: 18,
+		textAlign: 'center',
+
+	},
+	headerText: {
+		fontSize: 18,
+		textAlign: 'center'
 	}
 });
 
