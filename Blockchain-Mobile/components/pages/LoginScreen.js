@@ -19,6 +19,9 @@ export default class App extends React.Component {
 	}
 
 	submitButtonTapped() {
+		AsyncStorage.getItem(global.blockchain, (err, res) => {
+			console.log(JSON.parse(res))
+		})
 		if (this.state.key != "" && this.state.pass != "") {
 			AsyncStorage.getItem(global.keystore, (err, res) => {
 				if (!err && res) {

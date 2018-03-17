@@ -109,7 +109,7 @@ export default class App extends React.Component {
 										voted = true
 									}
 								}
-								if (!ending) {
+								if (!voted) {
 									if (transactionCount >= contractData[x].data.limit) {
 										this.showErrorMessage('Limit Reached', 'Voter Limit Reached')
 									} else {
