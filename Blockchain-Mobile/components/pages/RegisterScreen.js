@@ -29,25 +29,18 @@ export default class App extends React.Component {
 		return result;
 	}
 
-	// generateAddress() {
-	// 	global.privKey = this.generatePrivateKey();
-	// 	var privKey = ec.keyFromPrivate(global.privKey, 'hex');
-	// 	global.pubKey = privKey.getPublic().encode('hex');
-	// 	this.setState({
-	// 		address: global.pubKey
-	// 	})
-	// }
+	showErrorMessage(title, message) {
+		Alert.alert(title, message)
+	}
 
 	submitButtonTapped() {
-		if (this.state.pass == this.state.rePass) {
+		if (this.state.pass == this.state.rePass && this.state.pass != "") {
 			var newArr = {}
 			var passHash = CryptoJS.SHA256(this.state.key + this.state.pass).toString(CryptoJS.enc.Hex)
 			var newData = {
 				privKey: this.state.key,
 				pass: passHash
 			}
-			
-
 			AsyncStorage.getItem(global.keystore, (err, res) => {
 				if (!err && res) {
 					newArr = JSON.parse(res)
@@ -64,8 +57,10 @@ export default class App extends React.Component {
 					this.props.navigation.dispatch(resetAction);
 				})
 			})
+		} else if (this.state.pass == "") {
+			this.showErrorMessage('Password Invalid', 'Please Enter Valid Password')
 		} else {
-			console.log("Invalid")
+			this.showErrorMessage('Password Do Not Match', 'Please Enter Matching Password')
 		}
 	}
 

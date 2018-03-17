@@ -35,26 +35,33 @@ export default class App extends React.Component {
 			<View style={styles.container}>
 				<ScrollView>
 					<DrawerItem
-						itemName="Voting"
+						itemName="Home"
 						onPress={() => {
-							this.props.navigation.navigate('Voting')
+							this.props.navigation.navigate('Home')
 							this.setState({position:0})
 						}} 
 						style={this.state.position==0 ? styles.navContainerCurr : styles.navContainer}/>
 					<DrawerItem
-						itemName="View Recent Blocks"
+						itemName="Voting"
 						onPress={() => {
-							this.props.navigation.navigate('Blockchain')
+							this.props.navigation.navigate('Voting')
 							this.setState({position:1})
 						}} 
 						style={this.state.position==1 ? styles.navContainerCurr : styles.navContainer}/>
 					<DrawerItem
-						itemName="Create New Vote"
+						itemName="View Recent Blocks"
 						onPress={() => {
-							this.props.navigation.navigate('CreateVote')
+							this.props.navigation.navigate('Blockchain')
 							this.setState({position:2})
 						}} 
 						style={this.state.position==2 ? styles.navContainerCurr : styles.navContainer}/>
+					<DrawerItem
+						itemName="Create New Vote"
+						onPress={() => {
+							this.props.navigation.navigate('CreateVote')
+							this.setState({position:3})
+						}} 
+						style={this.state.position==3 ? styles.navContainerCurr : styles.navContainer}/>
 					<DrawerItem
 						itemName="Log Out"
 						onPress={() => {
@@ -72,19 +79,28 @@ export default class App extends React.Component {
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
+		flexDirection: 'column',
 	},
 	navContainer: {
 		alignItems: 'center',
 		backgroundColor: '#FFF',
+		flex: 1
 	},
 	navContainerCurr: {
 		alignItems: 'center',
 		backgroundColor: '#e5e6e8',
+		flex: 1
 	},
 	navItem: {
 		width:'100%',
 		padding: 10,
 		borderBottomWidth: 1,
 		borderBottomColor: '#DDD',
+	},
+	logOutStyle: {
+		alignItems: 'center',
+		backgroundColor: '#FFF',
+		alignSelf: 'flex-end',
+		flex: 1
 	}
 });

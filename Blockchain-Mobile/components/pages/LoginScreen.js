@@ -9,9 +9,13 @@ export default class App extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = { 
-			key: "5b6373776ad233c35729747b8342f17c",
+			key: "9c5153fa9cec66ca018611d4645c18aa",
 			pass: "asd"
 		}
+	}
+
+	showErrorMessage(title, message) {
+		Alert.alert(title, message)
 	}
 
 	submitButtonTapped() {
@@ -20,31 +24,27 @@ export default class App extends React.Component {
 				if (!err && res) {
 					var passHash = CryptoJS.SHA256(this.state.key + this.state.pass).toString(CryptoJS.enc.Hex)
 					var keyObj = JSON.parse(res)
-					if (keyObj[this.state.key].pass == passHash) {
-						const resetAction = NavigationActions.reset({
-							index: 0,
-							actions: [NavigationActions.navigate({ routeName: 'MainMenu' })],
-						});
-						const loggedInString = JSON.stringify(keyObj[this.state.key])
-						AsyncStorage.setItem(global.loggedIn, loggedInString, () => {
-							this.props.navigation.dispatch(resetAction);
-						})
-
-						
-					} else{
-						console.log(res)
+					try {
+						if (keyObj[this.state.key].pass == passHash) {
+							const resetAction = NavigationActions.reset({
+								index: 0,
+								actions: [NavigationActions.navigate({ routeName: 'MainMenu' })],
+							});
+							const loggedInString = JSON.stringify(keyObj[this.state.key])
+							AsyncStorage.setItem(global.loggedIn, loggedInString, () => {
+								this.props.navigation.dispatch(resetAction);
+							})
+						}
+					} catch (e) {
+						this.showErrorMessage('Username / Password Invalid', 'Please Enter Valid Username & Password')
 					}
 				} else {
-
+					this.showErrorMessage('Username / Password Invalid', 'Please Enter Valid Username & Password')
 				}
 			})
 		} else {
-			Alert.alert(
-				'Address Invalid',
-				'Please Generate Address First Before Login'
-			)
+			this.showErrorMessage('Username / Password Invalid', 'Please Enter Valid Username & Password')
 		}
-		
 	}
 
 	render() {

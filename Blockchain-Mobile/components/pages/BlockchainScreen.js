@@ -18,6 +18,10 @@ export default class App extends React.Component {
 		this.setState({ modalVisible: visibility })
 	}
 
+	showErrorMessage(title, message) {
+		Alert.alert(title, message)
+	}
+
 	submitButtonTaped() {
 		AsyncStorage.getItem(global.blockchain, (err, res) => {
 			if (!err && res) {
@@ -26,6 +30,7 @@ export default class App extends React.Component {
 
 				var transactionCount = 0;
 				var transactions = []
+				var ending = false
 
 				for (var x = 0; x < contractData.length; x++) {
 					if (contractData[x].data.voteId === this.state.voteId) {
@@ -42,11 +47,16 @@ export default class App extends React.Component {
 						})
 						console.log(this.state.transactions)
 						this.toggleModal(true)
+						ending = true
 						break
 					}
 				}
+				if (!ending) {
+					this.showErrorMessage('Vote ID Not Found', 'Please Enter Valid Vote ID')
+				}
+
 			} else {
-				console.log("Error")
+				this.showErrorMessage('Vote ID Not Found', 'Please Enter Valid Vote ID')
 			}
 		})
 		

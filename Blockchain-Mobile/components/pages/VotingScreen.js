@@ -2,6 +2,9 @@ import React from 'react';
 import { Modal, StyleSheet, Text, View, AsyncStorage, TextInput, TouchableHighlight, TouchableOpacity, Button, Alert } from 'react-native';
 import Icon from 'react-native-vector-icons/Entypo';
 
+const EC = require('elliptic').ec;
+const ec = new EC('secp256k1');
+
 export default class App extends React.Component {
 	constructor(props) {
 		super(props);
@@ -21,6 +24,10 @@ export default class App extends React.Component {
 		this.setState({ modalVisible: visibility })
 	}
 
+	showErrorMessage(title, message) {
+		Alert.alert(title, message)
+	}
+
 	submitButtonTaped() {
 		AsyncStorage.getItem(global.blockchain, (err, res) => {
 			if (!err && res) {
@@ -29,27 +36,46 @@ export default class App extends React.Component {
 
 				var transactionCount = 0;
 				var contract = {}
-
-				for (var x = 0; x < contractData.length; x++) {
-					if (contractData[x].data.voteId === this.state.voteId) {
-						for (var y = 0; y < transactionList.length; y++) {
-
-							if (transactionList[y].data.voteId === this.state.voteId) {
-								transactionCount++
+				var ending = false
+				var voted = false
+				AsyncStorage.getItem(global.loggedIn, (err, res) => {
+					if (!err && res) {
+						const data = JSON.parse(res)
+						for (var x = 0; x < contractData.length; x++) {
+							if (contractData[x].data.voteId === this.state.voteId) {
+								for (var y = 0; y < transactionList.length; y++) {
+									if (transactionList[y].data.voteId === this.state.voteId) {
+										transactionCount++
+									} 
+									if (transactionList[y].sender == ec.keyFromPrivate(data.privKey, 'hex').getPublic().encode('hex')) {
+										voted = true
+										ending = true
+									}
+								}
+								if (voted) {
+									this.showErrorMessage('You Have Voted', 'You Already Cast Your Vote For This Vote ID')
+								} else {
+									if (transactionCount >= contractData[x].data.limit) {
+									this.showErrorMessage('Limit Reached', 'Voter Limit Reached')
+									} else {
+										this.setState({ voteData: contractData[x].data })
+										this.toggleModal(true)
+									}
+									ending = true
+								}
+								break
 							}
 						}
-						if (transactionCount >= contractData[x].data.limit) {
-							console.log("Limit Reached")
-						} else {
-							this.setState({ voteData: contractData[x].data })
-							this.toggleModal(true)
-						}
-						
-						break
+						if (!ending) {
+							this.showErrorMessage('Vote ID Not Found', 'Please Enter Valid Vote ID')
+						}	
+					} else {
+						this.showErrorMessage('No Internet Connection', 'Please Check Your Internet Connection')
 					}
-				}	
+				})
+				
 			} else {
-				console.log("Error")
+				this.showErrorMessage('Vote ID Not Found', 'Please Enter Valid Vote ID')
 			}
 		})		
 	}
@@ -70,33 +96,42 @@ export default class App extends React.Component {
 
 						var transactionCount = 0;
 						var contract = {}
+						var voted = false
 
 						for (var x = 0; x < contractData.length; x++) {
-							if (contractData[x].data.voteId === this.state.voteId) {
+							if (contractData[x].data.voteId == this.state.voteId) {
 								for (var y = 0; y < transactionList.length; y++) {
-									if (transactionList[y].data.voteId === this.state.voteId) {
+									if (transactionList[y].data.voteId == this.state.voteId) {
 										transactionCount++
+									} else if (transactionList[y].sender == ec.keyFromPrivate(data.privKey, 'hex').getPublic().encode('hex')) {
+										voted = true
 									}
 								}
-								if (transactionCount >= contractData[x].data.limit) {
-									console.log("Limit Reached")
+								if (!ending) {
+									if (transactionCount >= contractData[x].data.limit) {
+										this.showErrorMessage('Limit Reached', 'Voter Limit Reached')
+									} else {
+										if (global.isConnected) {
+											this.showErrorMessage('Data Inserted To Pool !', 'Please Wait Until Pooling Is Done')
+											global.addNewTransaction(votingData, data.privKey)
+											this.setState({ modalVisible: false })
+										} else {
+											this.showErrorMessage('No Internet Connection', 'Please Check Your Internet Connection')
+										}
+									}									
 								} else {
-									global.addNewTransaction(votingData, data.privKey)
-									this.setState({ modalVisible: false })
+									this.showErrorMessage('You Have Voted', 'You Already Cast Your Vote For This Vote ID')
 								}
-								
+
 								break
 							}
 						}
-						
 					} else {
-						console.log("Error")
+						this.showErrorMessage('Vote ID Not Found', 'Please Enter Valid Vote ID')
 					}
 				})
-
-				
 			} else {
-				console.log("Error")
+				this.showErrorMessage('No Internet Connection', 'Please Check Your Internet Connection')
 			}
 		})
 	}
@@ -147,7 +182,7 @@ export default class App extends React.Component {
 					}}/>
 				<TouchableOpacity 
 					style={styles.submitButton}
-					onPress={() => { this.submitButtonTaped }}>
+					onPress={() => { this.submitButtonTaped() }}>
 					<Text>Submit</Text>
 				</TouchableOpacity>
 			</View>

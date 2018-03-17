@@ -1,5 +1,13 @@
 {
 	"expo": {
 		"sdkVersion": "25.0.0",
+		"name": "VoteChain",
+		"version": "1.0.0",
+		"ios": {
+			"bundleIdentifier": "com.farel.votechain"
+		},
+		"android": {
+			"package": "com.farell.votechain"
+		}
  	}
 }

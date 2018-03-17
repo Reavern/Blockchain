@@ -10,6 +10,7 @@ import BlockchainScreen from './components/pages/BlockchainScreen.js';
 import LogOutScreen from './components/pages/LogOutScreen.js';
 import RegisterScreen from './components/pages/RegisterScreen.js';
 import CreateVoteScreen from './components/pages/CreateVoteScreen.js';
+import HomeScreen from './components/pages/HomeScreen.js';
 
 
 import DrawerMenu from './components/menus/DrawerMenu.js';
@@ -19,9 +20,10 @@ import './components/javascripts/GlobalConst.js'
 
 
 const MainRouter = DrawerNavigator({
-	Voting: 		{ screen: VotingScreen },
-	Blockchain: 	{ screen: BlockchainScreen },
-	CreateVote: 	{ screen: CreateVoteScreen },
+	Home: 			{ screen: HomeScreen, navigationOptions: {title: 'Home'} },
+	Voting: 		{ screen: VotingScreen, navigationOptions: {title: 'Voting'} },
+	Blockchain: 	{ screen: BlockchainScreen, navigationOptions: {title: 'View Recent Blocks'} },
+	CreateVote: 	{ screen: CreateVoteScreen, navigationOptions: {title: 'Create Vote'} },
 	LogOut: 		{ screen: LogOutScreen }
 }, {
 	contentComponent: DrawerMenu
@@ -29,10 +31,10 @@ const MainRouter = DrawerNavigator({
 
 const RootRouter = StackNavigator({
   	Login: {
-		screen: LoginScreen
+		screen: LoginScreen, navigationOptions: {title: 'Login'}
 	},
 	Register: {
-		screen: RegisterScreen
+		screen: RegisterScreen, navigationOptions: {title: 'Register'}
 	},
   	MainMenu: {
 		screen: MainRouter,
