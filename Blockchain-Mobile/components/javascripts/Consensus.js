@@ -200,7 +200,7 @@ socket.on('DataVoteResult', (result, connectedUsers) => { // Leader
 			socket.emit('RemoveData');
 		}
 		dataVoteResult = []
-	}, 1000)
+	}, 500)
 });
 
 socket.on('DataToRemove', () => { // All
