@@ -174,20 +174,60 @@ socket.on('DataToVote', (block, type) => { // All
 	isPooling = true;
 	const newBlock = JSON.parse(block)
 	const keyValid = verifyMessage(newBlock.hash, newBlock.sign, newBlock.sender)
-	var latestBlock, blockValid
+	var latestBlock, blockValid, contractValid,transactionValid
+	var contractOverallValid, transactionOverallValid
 
-	if (type == "TRANSACTIONS") {
-		latestBlock = blockchain.main.transactions.getLatestBlock()
-		blockValid = blockchain.main.transactions.isNewBlockValid(newBlock)
-	} else if (type == "CONTRACTS") {
-		latestBlock = blockchain.main.contracts.getLatestBlock()
-		blockValid = blockchain.main.contracts.isNewBlockValid(newBlock)
-	}
-	var result = false;
-	if (keyValid && blockValid) {
-		result = true;
-	}
-	socket.emit('VoteForData', result);
+	AsyncStorage.getItem(global.blockchain, (err, res) => {
+		if (!err && res) {
+			const contractData = JSON.parse(res).contracts.chain
+			const transactionList = JSON.parse(res).transactions.chain
+
+			for (var x = 0; x < contractData.length; x++) {
+				if (contractData[x].data.voteId == newBlock.data.voteId) {
+					contractValid = true
+					for (var y = 0; y < transactionList.length; y++) {
+						if (transactionList[y].data.voteId == newBlock.data.voteId) {
+							if (transactionList[y].sender == newBlock.sender) {
+								transactionValid = true
+							} else {
+								transactionValid = false
+							}
+						} 
+					}
+					break
+				} else {
+					contractValid = false
+				}
+			}
+
+
+
+			if (type == "TRANSACTIONS") {
+				contractOverallValid = contractValid
+				transactionOverallValid = !transactionValid
+				latestBlock = blockchain.main.transactions.getLatestBlock()
+				blockValid = blockchain.main.transactions.isNewBlockValid(newBlock)
+			} else if (type == "CONTRACTS") {
+				contractOverallValid = !contractValid
+				transactionOverallValid = true
+				latestBlock = blockchain.main.contracts.getLatestBlock()
+				blockValid = blockchain.main.contracts.isNewBlockValid(newBlock)
+
+
+			}
+			var result = false;
+			if (keyValid && blockValid && contractOverallValid && transactionOverallValid) {
+				result = true;
+			}
+			socket.emit('VoteForData', result);
+
+
+
+		} else {
+			socket.emit('VoteForData', false);
+		}
+	})
+
 });
 
 socket.on('DataVoteResult', (result, connectedUsers) => { // Leader

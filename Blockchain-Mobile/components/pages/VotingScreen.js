@@ -46,11 +46,13 @@ export default class App extends React.Component {
 								for (var y = 0; y < transactionList.length; y++) {
 									if (transactionList[y].data.voteId === this.state.voteId) {
 										transactionCount++
+										if (transactionList[y].sender == ec.keyFromPrivate(data.privKey, 'hex').getPublic().encode('hex')) {
+											voted = true
+											ending = true
+											break
+										}
 									} 
-									if (transactionList[y].sender == ec.keyFromPrivate(data.privKey, 'hex').getPublic().encode('hex')) {
-										voted = true
-										ending = true
-									}
+
 								}
 								if (voted) {
 									this.showErrorMessage('You Have Voted', 'You Already Cast Your Vote For This Vote ID')
