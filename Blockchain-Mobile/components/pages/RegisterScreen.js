@@ -17,17 +17,19 @@ export default class App extends React.Component {
 	}
 
 	componentDidMount() {
-		this.setState({
-			key: this.generatePrivateKey()
-		})
+
 	}
 
 	generatePrivateKey() {
 		var charset = "0123456789abcdef";
 		var result = "";
+		const timestamp = new Date().getTime()
 		for( var i=0; i < 32; i++ )
 			result += charset[Math.floor(Math.random() * charset.length)];
-		return result
+		result = result + this.state.pass + timestamp
+
+
+		return CryptoJS.SHA256(result).toString(CryptoJS.enc.Hex)
 	}
 
 	showErrorMessage(title, message) {
@@ -38,8 +40,9 @@ export default class App extends React.Component {
 		if (this.state.pass == this.state.rePass && this.state.pass != "" && this.state.user != "") {
 			var newArr = {}
 			var passHash = CryptoJS.SHA256(this.state.user + this.state.pass).toString(CryptoJS.enc.Hex)
+			
 			var newData = {
-				privKey: this.state.key,
+				privKey: this.generatePrivateKey(),
 				pass: passHash
 			}
 			AsyncStorage.getItem(global.keystore, (err, res) => {
@@ -50,7 +53,7 @@ export default class App extends React.Component {
 					newArr[this.state.user] = newData
 					var newStr = JSON.stringify(newArr)
 					AsyncStorage.setItem(global.keystore, newStr, () => {
-						this.showErrorMessage('User Created', 'Please Login')
+						this.showErrorMessage('User Created', 'You Can Now Login Using These Credentials')
 						const resetAction = NavigationActions.reset({
 								index: 0,
 								actions: [NavigationActions.navigate({ routeName: 'Login' })],
