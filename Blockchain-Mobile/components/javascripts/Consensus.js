@@ -1,7 +1,6 @@
 import { AsyncStorage } from 'react-native';
 
-const IP_ADDRESS = 'http://192.168.1.252:3000'
-const socket = require('socket.io-client')(IP_ADDRESS);
+const socket = require('socket.io-client')(global.IP_ADDRESS);
 const Blockchain = require('./Blockchain.js');
 const EC = require('elliptic').ec;
 const ec = new EC('secp256k1');

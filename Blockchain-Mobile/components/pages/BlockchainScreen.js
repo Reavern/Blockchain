@@ -1,5 +1,6 @@
 import React from 'react';
 import { Modal, StyleSheet, Text, View, AsyncStorage, TextInput, TouchableOpacity, Alert, FlatList } from 'react-native';
+import { Header } from 'react-navigation'
 import Icon from 'react-native-vector-icons/Entypo';
 
 export default class App extends React.Component {
@@ -7,10 +8,15 @@ export default class App extends React.Component {
 		super(props);
 		this.state = {
 			voteId: "",
-			contractData: [],
+			contractData: {
+				data: {
+					candidates: ["", ""]
+				}
+			},
 			modalVisible: false,
 			transactions: [],
-			transactionCount: 0
+			transactionCount: 0,
+			points: {can1: 0, can2: 0}
 		}
 	}
 
@@ -28,7 +34,7 @@ export default class App extends React.Component {
 				const contractData = JSON.parse(res).contracts.chain
 				const transactionList = JSON.parse(res).transactions.chain
 
-				var transactionCount = 0;
+				var transactionCount = canPoint1 = canPoint2 = 0;
 				var transactions = []
 				var ending = false
 
@@ -38,14 +44,22 @@ export default class App extends React.Component {
 						for (var y = 0; y < transactionList.length; y++) {
 							if (transactionList[y].data.voteId === this.state.voteId) {
 								transactionCount++
+								if (transactionList[y].data.choice == this.state.contractData.data.candidates[0]) {
+									canPoint1++
+								} else if (transactionList[y].data.choice == this.state.contractData.data.candidates[1]) {
+									canPoint2++
+								}
 								transactions.push(transactionList[y].data)
 							}
 						}
 						this.setState({
 							transactions: transactions,
-							transactionCount: transactionCount
+							transactionCount: transactionCount,
+							points: {
+								can1: canPoint1,
+								can2: canPoint2
+							}
 						})
-						console.log(this.state.transactions)
 						this.toggleModal(true)
 						ending = true
 						break
@@ -70,7 +84,8 @@ export default class App extends React.Component {
 					transparent={false}
 					visible={this.state.modalVisible}
 					onRequestClose={() => { this.toggleModal(false) }}>
-					<View style={styles.containerRow}>
+					
+					<View style={styles.containerRowTop}>
 						<View style={{alignItems: 'flex-start', justifyContent: 'center', flex:0.5}}>
 							<TouchableOpacity
 							onPress={() => { this.toggleModal(false) }}>
@@ -78,7 +93,7 @@ export default class App extends React.Component {
 						</TouchableOpacity>
 						</View>
 						
-						<View style={{alignItems: 'center', justifyContent: 'center', flex:1}}>
+						{/*<View style={{alignItems: 'center', justifyContent: 'center', flex:1}}>
 							<Text style={styles.headerText}>
 								{this.state.voteId}{"\n"}Total Vote Count: {this.state.transactionCount}
 							</Text>
@@ -88,6 +103,32 @@ export default class App extends React.Component {
 							onPress={() => { this.submitButtonTaped() }}>
 								<Icon name="cw" size={40} color="black" style={{margin: 5}}/>
 							</TouchableOpacity>
+						</View>*/}
+					</View>
+					<View style={styles.containerRow}>
+						<View style={{ alignItems: 'flex-start', flex: 1, margin: 5 }}>
+							<Text style={styles.percText}>{this.state.contractData.data.candidates[0]}</Text>
+						</View>
+						<View style={{ alignItems: 'flex-end', flex: 1, margin: 5 }}>
+							<Text style={styles.percText}>{this.state.contractData.data.candidates[1]}</Text>
+						</View>
+					</View>
+					<View style={styles.containerRow}>
+						<View 
+							style={{
+								alignItems: 'flex-start', 
+								flex: this.state.points.can1 / this.state.points.can2, 
+								height: 30, 
+								backgroundColor: '#2591f7'}} >
+							<Text style={styles.percText}>{Math.floor(this.state.points.can1 / (this.state.points.can2 + this.state.points.can1) * 100)}%</Text>
+						</View>
+						<View 
+							style={{
+								alignItems: 'flex-end', 
+								flex: this.state.points.can2 / this.state.points.can1, 
+								height: 30, 
+								backgroundColor: '#4fd0ff'}} >
+							<Text style={styles.percText}>{Math.floor(this.state.points.can2 / (this.state.points.can2 + this.state.points.can1) * 100)}%</Text>
 						</View>
 					</View>
 					<View style={styles.container}>
@@ -141,6 +182,18 @@ const styles = StyleSheet.create({
 	containerRow: {
 		flexDirection: 'row',
 	},
+	containerRowTop: {
+		flexDirection: 'row',
+		borderWidth: 1,
+	    borderRadius: 3,
+	    borderColor: '#ddd',
+	    borderBottomWidth: 0,
+	    shadowColor: '#000',
+	    shadowOffset: { width: 0, height: 2 },
+	    shadowOpacity: 2,
+	    shadowRadius: 2,
+	    elevation: 1,
+	},
 	textInput: {
 		height: 40,
 		width: '70%',
@@ -177,6 +230,9 @@ const styles = StyleSheet.create({
 	headerText: {
 		fontSize: 18,
 		textAlign: 'center'
+	},
+	percText: {
+		fontSize: 18,
 	}
 });
 

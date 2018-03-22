@@ -9,8 +9,8 @@ export default class App extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = { 
-			key: "9c5153fa9cec66ca018611d4645c18aa",
-			pass: "asd"
+			user: "",
+			pass: ""
 		}
 	}
 
@@ -19,24 +19,24 @@ export default class App extends React.Component {
 	}
 
 	submitButtonTapped() {
-		AsyncStorage.getItem(global.blockchain, (err, res) => {
-			console.log(JSON.parse(res))
-		})
 		if (this.state.key != "" && this.state.pass != "") {
 			AsyncStorage.getItem(global.keystore, (err, res) => {
 				if (!err && res) {
-					var passHash = CryptoJS.SHA256(this.state.key + this.state.pass).toString(CryptoJS.enc.Hex)
+					var passHash = CryptoJS.SHA256(this.state.user + this.state.pass).toString(CryptoJS.enc.Hex)
 					var keyObj = JSON.parse(res)
 					try {
-						if (keyObj[this.state.key].pass == passHash) {
+						if (keyObj[this.state.user].pass == passHash) {
 							const resetAction = NavigationActions.reset({
 								index: 0,
 								actions: [NavigationActions.navigate({ routeName: 'MainMenu' })],
 							});
-							const loggedInString = JSON.stringify(keyObj[this.state.key])
+							const loggedInString = JSON.stringify(keyObj[this.state.user])
 							AsyncStorage.setItem(global.loggedIn, loggedInString, () => {
+								console.log("A")
 								this.props.navigation.dispatch(resetAction);
 							})
+						} else {
+							this.showErrorMessage('Username / Password Invalid', 'Please Enter Valid Username & Password')
 						}
 					} catch (e) {
 						this.showErrorMessage('Username / Password Invalid', 'Please Enter Valid Username & Password')
@@ -55,12 +55,12 @@ export default class App extends React.Component {
 			<View style={styles.container}>
 				<TextInput 
 					style={styles.textInput}
-					value={this.state.key}
+					value={this.state.user}
 					autoCorrect={false}
 					underlineColorAndroid='transparent'
-					placeholder="Address"
+					placeholder="Username"
 					onChangeText={(text) => {
-						this.setState({key: text})
+						this.setState({user: text})
 					}} />
 				<TextInput 
 					style={styles.textInput}

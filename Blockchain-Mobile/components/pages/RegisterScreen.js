@@ -11,8 +11,9 @@ export default class App extends React.Component {
 		this.state = { 
 			key: "",
 			pass: "",
-			rePass: ""
-		};
+			rePass: "",
+			user: ""
+		}
 	}
 
 	componentDidMount() {
@@ -25,8 +26,8 @@ export default class App extends React.Component {
 		var charset = "0123456789abcdef";
 		var result = "";
 		for( var i=0; i < 32; i++ )
-		        result += charset[Math.floor(Math.random() * charset.length)];
-		return result;
+			result += charset[Math.floor(Math.random() * charset.length)];
+		return result
 	}
 
 	showErrorMessage(title, message) {
@@ -34,9 +35,9 @@ export default class App extends React.Component {
 	}
 
 	submitButtonTapped() {
-		if (this.state.pass == this.state.rePass && this.state.pass != "") {
+		if (this.state.pass == this.state.rePass && this.state.pass != "" && this.state.user != "") {
 			var newArr = {}
-			var passHash = CryptoJS.SHA256(this.state.key + this.state.pass).toString(CryptoJS.enc.Hex)
+			var passHash = CryptoJS.SHA256(this.state.user + this.state.pass).toString(CryptoJS.enc.Hex)
 			var newData = {
 				privKey: this.state.key,
 				pass: passHash
@@ -45,18 +46,23 @@ export default class App extends React.Component {
 				if (!err && res) {
 					newArr = JSON.parse(res)
 				}
-				newArr[this.state.key] = newData
-				var newStr = JSON.stringify(newArr)
-				AsyncStorage.setItem(global.keystore, newStr, () => {
-					console.log(newStr)
-					console.log("Stored")
-					const resetAction = NavigationActions.reset({
-							index: 0,
-							actions: [NavigationActions.navigate({ routeName: 'Login' })],
-					});
-					this.props.navigation.dispatch(resetAction);
-				})
+				if (newArr[this.state.user] == null) {
+					newArr[this.state.user] = newData
+					var newStr = JSON.stringify(newArr)
+					AsyncStorage.setItem(global.keystore, newStr, () => {
+						this.showErrorMessage('User Created', 'Please Login')
+						const resetAction = NavigationActions.reset({
+								index: 0,
+								actions: [NavigationActions.navigate({ routeName: 'Login' })],
+						});
+						this.props.navigation.dispatch(resetAction);
+					})					
+				} else {
+					this.showErrorMessage('Username Invalid', 'Please Enter Valid Username')
+				}
 			})
+		} else if (this.state.user == "") {
+			this.showErrorMessage('Username Invalid', 'Please Enter Valid Username')
 		} else if (this.state.pass == "") {
 			this.showErrorMessage('Password Invalid', 'Please Enter Valid Password')
 		} else {
@@ -69,11 +75,13 @@ export default class App extends React.Component {
 			<View style={styles.container}>
 				<TextInput 
 					style={styles.textInput}
-					value={this.state.key}
+					value={this.state.user}
 					autoCorrect={false}
 					underlineColorAndroid='transparent'
-					placeholder="Address"
-					editable={false} 
+					placeholder="Username"
+					onChangeText={(text) => {
+						this.setState({user: text})
+					}}
 				/>
 				<TextInput 
 					style={styles.textInput}

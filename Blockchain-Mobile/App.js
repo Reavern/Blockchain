@@ -15,8 +15,9 @@ import HomeScreen from './components/pages/HomeScreen.js';
 
 import DrawerMenu from './components/menus/DrawerMenu.js';
 
-import './components/javascripts/Consensus.js'
 import './components/javascripts/GlobalConst.js'
+import './components/javascripts/Consensus.js'
+
 
 
 const MainRouter = DrawerNavigator({
@@ -26,7 +27,7 @@ const MainRouter = DrawerNavigator({
 	CreateVote: 	{ screen: CreateVoteScreen, navigationOptions: {title: 'Create Vote'} },
 	LogOut: 		{ screen: LogOutScreen }
 }, {
-	contentComponent: DrawerMenu
+	contentComponent: DrawerMenu,
 })
 
 const RootRouter = StackNavigator({
@@ -46,7 +47,6 @@ const RootRouter = StackNavigator({
 			</TouchableOpacity>
 		})
 	},
-
 })
 
 
