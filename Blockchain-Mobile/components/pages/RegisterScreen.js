@@ -16,10 +16,6 @@ export default class App extends React.Component {
 		}
 	}
 
-	componentDidMount() {
-
-	}
-
 	generatePrivateKey() {
 		var charset = "0123456789abcdef";
 		var result = "";
@@ -61,7 +57,7 @@ export default class App extends React.Component {
 						this.props.navigation.dispatch(resetAction);
 					})					
 				} else {
-					this.showErrorMessage('Username Invalid', 'Please Enter Valid Username')
+					this.showErrorMessage('Username Taken', 'Please Enter Other Username')
 				}
 			})
 		} else if (this.state.user == "") {

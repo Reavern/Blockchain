@@ -52,13 +52,12 @@ export default class App extends React.Component {
 											break
 										}
 									} 
-
 								}
 								if (voted) {
 									this.showErrorMessage('You Have Voted', 'You Already Cast Your Vote For This Vote ID')
 								} else {
 									if (transactionCount >= contractData[x].data.limit) {
-									this.showErrorMessage('Limit Reached', 'Voter Limit Reached')
+										this.showErrorMessage('Limit Reached', 'Voter Limit Reached')
 									} else {
 										this.setState({ voteData: contractData[x].data })
 										this.toggleModal(true)
@@ -105,9 +104,10 @@ export default class App extends React.Component {
 								for (var y = 0; y < transactionList.length; y++) {
 									if (transactionList[y].data.voteId == this.state.voteId) {
 										transactionCount++
-									} else if (transactionList[y].sender == ec.keyFromPrivate(data.privKey, 'hex').getPublic().encode('hex')) {
-										voted = true
-									}
+										if (transactionList[y].sender == ec.keyFromPrivate(data.privKey, 'hex').getPublic().encode('hex')) {
+											voted = true
+										}
+									} 
 								}
 								if (!voted) {
 									if (transactionCount >= contractData[x].data.limit) {
@@ -124,7 +124,6 @@ export default class App extends React.Component {
 								} else {
 									this.showErrorMessage('You Have Voted', 'You Already Cast Your Vote For This Vote ID')
 								}
-
 								break
 							}
 						}
@@ -138,6 +137,21 @@ export default class App extends React.Component {
 		})
 	}
 
+	showConfirmButton() {
+		if (this.state.myChoice == "") {
+			this.showErrorMessage('No Candidate Selected', 'Please Select A Candidate')
+		} else {
+			const chooseString = "Are You Sure To Choose " + this.state.myChoice
+			Alert.alert('Vote Confirmation', chooseString,
+			[
+				{text: 'No', onPress: () => console.log('Cancel Pressed'), style: 'cancel'},
+				{text: 'Yes', onPress: () => this.voteButtonTapped() }
+			],
+			{ cancelable: false } )
+		}
+		
+	}
+
 	render() {
 		return (
 			<View style={styles.container}>
@@ -146,11 +160,24 @@ export default class App extends React.Component {
 					transparent={false}
 					visible={this.state.modalVisible}
 					onRequestClose={() => { this.toggleModal(false) }}>
-					<TouchableOpacity 
-						onPress={() => { this.toggleModal(false) }}>
-						<Icon name="chevron-left" size={40} color="black" style={{margin: 5}}/>
-					</TouchableOpacity>
+					<View style={styles.headerContainer}>
+						<View style={{flex:0.5, justifyContent:'center', alignItems:'flex-start'}}>
+							<TouchableOpacity 
+								onPress={() => { this.toggleModal(false) }}>
+								<Icon name="chevron-left" size={40} color="black" style={{margin: 5}}/>
+							</TouchableOpacity>
+						</View>
+						<View style={{flex:1, justifyContent:'center', alignItems:'center'}}>
+							<Text style={styles.headerText}>Vote ID: [ {this.state.voteId} ]</Text>
+						</View>
+						<View style={{flex:0.5, justifyContent:'center', alignItems:'flex-end'}}>
+						</View>
+					</View>
+					
 					<View style={styles.container}>
+						<View>
+							<Text style={styles.headerText}>Your Choice: {this.state.myChoice}</Text>
+						</View>
 						<View style={styles.containerHalf}>
 							<TouchableOpacity 
 								style={styles.voteButton}
@@ -167,7 +194,7 @@ export default class App extends React.Component {
 
 						<TouchableOpacity 
 							style={styles.submitButton}
-							onPress={() => { this.voteButtonTapped() }}>
+							onPress={() => { this.showConfirmButton() }}>
 							<Text>Vote</Text>
 						</TouchableOpacity>
 					</View>
@@ -204,6 +231,13 @@ const styles = StyleSheet.create({
 		flexDirection: 'row',
 		alignItems: 'center',
 		justifyContent: 'center',
+	},
+	headerContainer: {
+		flexDirection: 'row',
+	},
+	headerText: {
+		fontSize: 20,
+		fontWeight: 'bold'
 	},
 	textInput: {
 		height: 40,

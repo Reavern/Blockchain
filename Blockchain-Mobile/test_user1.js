@@ -1,11 +1,8 @@
-import { AsyncStorage } from 'react-native';
-
-const socket = require('socket.io-client')(global.IP_ADDRESS);
-const Blockchain = require('./Blockchain.js');
+const socket = require('socket.io-client')("http://192.168.1.252:3000");
+const Blockchain = require('./components/javascripts/Blockchain.js');
 const EC = require('elliptic').ec;
 const ec = new EC('secp256k1');
 
-global.isConnected = false;
 var blockchain = new Blockchain()
 
 // Helper Function
@@ -43,12 +40,10 @@ var leaderTimeout = 1000;
 
 socket.on('connect', () => {
 	console.log("Connected: " + socket.id);
-	global.isConnected = true;
 	firstTimeRun();
 });
 socket.on('disconnect', () => { 
 	console.log("Disconnected");
-	global.isConnected = false;
 	isFirstTimeSynced = false;
 	isLeader = false;
 });
@@ -68,7 +63,7 @@ function checkResult(connectedUsers, resultArray) {
 			trueCount++;
 		}
 	}
-	
+
 	if (trueCount >= halfUsers) {
 		return true;
 	} else {
@@ -82,28 +77,20 @@ socket.on('LeaderVoteResult', (result, connectedUsers) => {
 		console.log("I'm Elected")
 		socket.emit('Elected', socket.id)
 		isLeader = true
-	} else if (connectedUsers == voteResult.length) {
-		var trueCount = 0;
-		for (var x = 0; x < voteResult.length; x++) {
-			if (voteResult[x]) {
-				trueCount++;
-			}
-		}
-		console.log("Users: " + connectedUsers)
-	console.log("True: " + trueCount)
 	}
 });
 
 socket.on('DoVote', (candidateId, index) => {
-	if ((index >= blockchain.getTransactionsLength() && votedFor == "") || votedFor == candidateId) {
-		socket.emit('VoteForCandidate', candidateId, true)
-		votedFor = candidateId
-	} else if (candidateId == socket.id) {
-		socket.emit('VoteForCandidate', candidateId, true)
-		votedFor = candidateId
-	} else {
+	// if ((index >= blockchain.getTransactionsLength() && votedFor == "") || votedFor == candidateId) {
+	// 	socket.emit('VoteForCandidate', candidateId, true)
+	// 	votedFor = candidateId
+	// } else if (candidateId == socket.id) {
+	// 	socket.emit('VoteForCandidate', candidateId, true)
+	// 	votedFor = candidateId
+	// } else {
+		console.log("NO")
 		socket.emit('VoteForCandidate', candidateId, false)
-	}
+	// }
 });
 
 socket.on('NewLeaderElected', () => {
@@ -122,11 +109,9 @@ socket.on('SyncListener', (chain, pool) => {
 	blockchain.main.contracts.replaceChain(newBlockchain.contracts)
 
 	const storeData = JSON.stringify(blockchain.main)
-	AsyncStorage.setItem(global.blockchain, storeData, () => {
-		isFirstTimeSynced = true
-		clearTimeout(setTimeoutFirstTime)
-		console.log("Blockchain Synced!")	
-	})
+	isFirstTimeSynced = true
+	clearTimeout(setTimeoutFirstTime)
+	console.log("Blockchain Synced!")	
 
 
 })
@@ -184,56 +169,10 @@ socket.on('DataToVote', (block, type) => { // All
 	var latestBlock, blockValid, contractValid,transactionValid
 	var contractOverallValid, transactionOverallValid
 
-	AsyncStorage.getItem(global.blockchain, (err, res) => {
-		if (!err && res) {
-			const contractData = JSON.parse(res).contracts.chain
-			const transactionList = JSON.parse(res).transactions.chain
+	var result = false;
 
-			for (var x = 0; x < contractData.length; x++) {
-				if (contractData[x].data.voteId == newBlock.data.voteId) {
-					contractValid = true
-					for (var y = 0; y < transactionList.length; y++) {
-						if (transactionList[y].data.voteId == newBlock.data.voteId) {
-							if (transactionList[y].sender == newBlock.sender) {
-								transactionValid = true
-							} else {
-								transactionValid = false
-							}
-						} 
-					}
-					break
-				} else {
-					contractValid = false
-				}
-			}
-
-
-
-			if (type == "TRANSACTIONS") {
-				contractOverallValid = contractValid
-				transactionOverallValid = !transactionValid
-				latestBlock = blockchain.main.transactions.getLatestBlock()
-				blockValid = blockchain.main.transactions.isNewBlockValid(newBlock)
-			} else if (type == "CONTRACTS") {
-				contractOverallValid = !contractValid
-				transactionOverallValid = true
-				latestBlock = blockchain.main.contracts.getLatestBlock()
-				blockValid = blockchain.main.contracts.isNewBlockValid(newBlock)
-
-
-			}
-			var result = false;
-			if (keyValid && blockValid && contractOverallValid && transactionOverallValid) {
-				result = true;
-			}
-			socket.emit('VoteForData', result);
-			console.log(result)
-
-		} else {
-			socket.emit('VoteForData', false);
-			console.log(false)
-		}
-	})
+	console.log("Vote: " + result)
+	socket.emit('VoteForData', result);
 
 });
 
@@ -265,12 +204,10 @@ socket.on('DataToCommit', (pool, type) => { // All
 	} else {
 		console.log("No Type")
 	}
-	const storeData = JSON.stringify(blockchain.main)
-	AsyncStorage.setItem(global.blockchain, storeData, () => {
-		blockPool.splice(0, 1);
-		isPooling = false;
-		console.log("COMMITED")		
-	})
+
+	blockPool.splice(0, 1);
+	isPooling = false;
+	console.log("COMMITED")		
 
 });
 
@@ -280,23 +217,8 @@ socket.on('DataToPool', (block, type) => {
 
 // First Time Run
 function firstTimeRun() {
-	resetLeaderTimeout()
-	resetPoolTimeout()
-	AsyncStorage.getItem(global.blockchain, (err, res) => {
-
-		if (!err && res) {
-			const storedBlockchain = JSON.parse(res)
-			blockchain.main.transactions.replaceChain(storedBlockchain.transactions)
-			blockchain.main.contracts.replaceChain(storedBlockchain.contracts)
-			console.log(storedBlockchain)
-		}
-
-		setTimeoutFirstTime = setInterval(() => {
-			if (hasLeader && !isFirstTimeSynced) {
-				socket.emit('RequestSync', socket.id)
-			}
-		}, 500);
-	})
+	//resetLeaderTimeout()
+	//resetPoolTimeout()
 }
 
 

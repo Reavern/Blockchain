@@ -1,7 +1,6 @@
 import React from 'react';
-import { StyleSheet, Text, View, AsyncStorage, Platform, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import { StackNavigator, DrawerNavigator } from 'react-navigation';
-import { getStatusBarHeight } from 'react-native-status-bar-height';
 import Icon from 'react-native-vector-icons/Entypo';
 
 import LoginScreen from './components/pages/LoginScreen.js';

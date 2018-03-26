@@ -32,7 +32,6 @@ export default class App extends React.Component {
 							});
 							const loggedInString = JSON.stringify(keyObj[this.state.user])
 							AsyncStorage.setItem(global.loggedIn, loggedInString, () => {
-								console.log("A")
 								this.props.navigation.dispatch(resetAction);
 							})
 						} else {
@@ -76,7 +75,7 @@ export default class App extends React.Component {
 				<TouchableOpacity 
 					style={styles.submitButton}
 					onPress={() => {this.submitButtonTapped()}}>
-					<Text>Submit</Text>
+					<Text>Log In</Text>
 				</TouchableOpacity>
 				<TouchableOpacity 
 					style={styles.submitButton}
