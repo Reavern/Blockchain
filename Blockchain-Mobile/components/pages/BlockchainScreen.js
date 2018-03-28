@@ -34,7 +34,7 @@ export default class App extends React.Component {
 				const contractData = JSON.parse(res).contracts.chain
 				const transactionList = JSON.parse(res).transactions.chain
 
-				var transactionCount = canPoint1 = canPoint2 = 0;
+				var transactionCount = canPoint1 = canPoint2 = 0
 				var transactions = []
 				var ending = false
 
@@ -117,7 +117,7 @@ export default class App extends React.Component {
 						<View 
 							style={{
 								alignItems: 'flex-start', 
-								flex: this.state.points.can1 / this.state.points.can2, 
+								flex: this.state.points.can1, 
 								height: 30, 
 								backgroundColor: '#2591f7'}} >
 							<Text style={styles.percText}>{Math.floor(this.state.points.can1 / (this.state.points.can2 + this.state.points.can1) * 100)}%</Text>
@@ -125,7 +125,7 @@ export default class App extends React.Component {
 						<View 
 							style={{
 								alignItems: 'flex-end', 
-								flex: this.state.points.can2 / this.state.points.can1, 
+								flex: this.state.points.can2, 
 								height: 30, 
 								backgroundColor: '#4fd0ff'}} >
 							<Text style={styles.percText}>{Math.floor(this.state.points.can2 / (this.state.points.can2 + this.state.points.can1) * 100)}%</Text>
@@ -233,6 +233,8 @@ const styles = StyleSheet.create({
 	},
 	percText: {
 		fontSize: 18,
+		marginLeft: 5,
+		marginRight: 5
 	}
 });
 

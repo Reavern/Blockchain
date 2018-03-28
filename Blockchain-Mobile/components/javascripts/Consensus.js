@@ -269,7 +269,7 @@ socket.on('DataToCommit', (pool, type) => { // All
 	AsyncStorage.setItem(global.blockchain, storeData, () => {
 		blockPool.splice(0, 1);
 		isPooling = false;
-		console.log("COMMITED")		
+		console.log("COMMITED")
 	})
 
 });
@@ -288,7 +288,7 @@ function firstTimeRun() {
 			const storedBlockchain = JSON.parse(res)
 			blockchain.main.transactions.replaceChain(storedBlockchain.transactions)
 			blockchain.main.contracts.replaceChain(storedBlockchain.contracts)
-			console.log(storedBlockchain)
+
 		}
 
 		setTimeoutFirstTime = setInterval(() => {
