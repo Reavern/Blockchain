@@ -50,6 +50,7 @@ export default class App extends React.Component {
 	}
 
 	render() {
+		//AsyncStorage.clear()
 		return (
 			<View style={styles.container}>
 				<TextInput 

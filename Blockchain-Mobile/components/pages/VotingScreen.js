@@ -53,9 +53,11 @@ export default class App extends React.Component {
 										}
 									} 
 								}
+								
 								if (voted) {
 									this.showErrorMessage('You Have Voted', 'You Already Cast Your Vote For This Vote ID')
 								} else {
+									
 									if (transactionCount >= contractData[x].data.limit) {
 										this.showErrorMessage('Limit Reached', 'Voter Limit Reached')
 									} else {

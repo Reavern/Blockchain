@@ -48,6 +48,8 @@ class Blockchain {
 	}
 	isNewBlockValid(newBlock) {
 		if (this.getBlockchainLength() != newBlock.index) {
+			console.log(this.getBlockchainLength())
+			console.log(newBlock.index)
 			console.log("Invalid Index !");
 			return false;
 		} else if (this.chain[(this.getBlockchainLength() - 1)].hash !== newBlock.prevHash) {
@@ -65,10 +67,8 @@ class Blockchain {
 
 	}
 	addNewBlock(newBlock) {
-		console.log(newBlock)
 		if (this.isNewBlockValid(newBlock)) {
 			this.chain.push(newBlock)
-			
 		} else {
 			console.log("Invalid New Block")
 		}

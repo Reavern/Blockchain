@@ -170,8 +170,16 @@ function resetPoolTimeout() {
 function processPooledData() {
 	if (isLeader && blockPool.length != 0) {
 		isPooling = true
-		currentPoolData = blockPool[0].block
+		currentPoolData = JSON.parse(blockPool[0].block)
 		currentPoolType = blockPool[0].type
+
+		if (currentPoolType == "CONTRACTS") {
+			currentPoolData.index = blockchain.getContractsLength()
+		} else if (currentPoolType == "TRANSACTIONS") {
+			currentPoolData.index = blockchain.getTransactionsLength()
+		}
+		currentPoolData = JSON.stringify(currentPoolData)
+
 		socket.emit('ProcessPool', currentPoolData, currentPoolType)
 	}
 }
@@ -206,9 +214,6 @@ socket.on('DataToVote', (block, type) => { // All
 					contractValid = false
 				}
 			}
-
-
-
 			if (type == "TRANSACTIONS") {
 				contractOverallValid = contractValid
 				transactionOverallValid = !transactionValid
@@ -219,19 +224,14 @@ socket.on('DataToVote', (block, type) => { // All
 				transactionOverallValid = true
 				latestBlock = blockchain.main.contracts.getLatestBlock()
 				blockValid = blockchain.main.contracts.isNewBlockValid(newBlock)
-
-
 			}
 			var result = false;
 			if (keyValid && blockValid && contractOverallValid && transactionOverallValid) {
 				result = true;
 			}
 			socket.emit('VoteForData', result);
-			console.log(result)
-
 		} else {
 			socket.emit('VoteForData', false);
-			console.log(false)
 		}
 	})
 
@@ -247,7 +247,7 @@ socket.on('DataVoteResult', (result, connectedUsers) => { // Leader
 			socket.emit('RemoveData');
 		}
 		dataVoteResult = []
-	}, 500)
+	}, 100)
 });
 
 socket.on('DataToRemove', () => { // All
@@ -302,9 +302,9 @@ function firstTimeRun() {
 
 // Global Function
 global.addNewTransaction = function(nextData, key) {
-	const nextBlock = blockchain.main.transactions.generateNewBlock(nextData, key);
-	const nextBlockString = JSON.stringify(nextBlock);
-	socket.emit('AddDataToPool', nextBlockString, "TRANSACTIONS");
+	const nextBlock = blockchain.main.transactions.generateNewBlock(nextData, key)
+	const nextBlockString = JSON.stringify(nextBlock)
+	socket.emit('AddDataToPool', nextBlockString, "TRANSACTIONS")
 }
 
 global.addNewContract = function(nextData, key) {
