@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, View, AsyncStorage, TextInput, TouchableOpacity, Alert } from 'react-native';
+import { StyleSheet, Text, View, AsyncStorage, TextInput, TouchableOpacity, Alert, Picker } from 'react-native';
 
 export default class App extends React.Component {
 	constructor(props) {
@@ -8,7 +8,9 @@ export default class App extends React.Component {
 			voteId: "",
 			candidate1: "",
 			candidate2: "",
-			limit: ""
+			limit: "",
+			candidates: 2,
+			candidateArray: ["", ""]
 		}
 	}
 
@@ -16,8 +18,21 @@ export default class App extends React.Component {
 		Alert.alert(title, message)
 	}
 
+	checkArrayNull() {
+		var count = 0
+		for (var x = 0; x < this.state.candidateArray.length; x++) {
+			if (this.state.candidateArray[x] != "")
+				count ++
+		}
+		if (count == this.state.candidateArray.length) {
+			return true
+		} else {
+			return false
+		}
+	}
+
 	submitButtonTapped() {
-		if (this.voteId != "" && this.state.limit != "" && this.state.candidate1 != "" && this.state.candidate2 != "") {
+		if (this.voteId != "" && this.state.limit != "" && this.checkArrayNull()) {
 			AsyncStorage.getItem(global.blockchain, (err, res) => {
 				if (!err && res) {
 					const contractData = JSON.parse(res).contracts.chain
@@ -33,7 +48,7 @@ export default class App extends React.Component {
 					if (ending) {
 						this.showErrorMessage('Vote ID Already Available', 'Please Enter Other Vote ID')
 					} else {
-						const candidateArray = [this.state.candidate1, this.state.candidate2]
+						const candidateArray = this.state.candidateArray
 						const voteData = {
 							voteId: this.state.voteId,
 							limit: this.state.limit,
@@ -82,26 +97,51 @@ export default class App extends React.Component {
 						onChangeText={(text) => {
 							this.setState({limit: text})
 						}}/>
+				</View>
+				<View style={styles.containerHalf}>
+					<View style={styles.halfText}>
+						<Text>Candidates</Text>
 					</View>
-				
-				<TextInput 
-					style={styles.textInput}
-					value={this.state.candidate1}
-					autoCorrect={false}
-					underlineColorAndroid='transparent'
-					placeholder="Candidate 1 Name"
-					onChangeText={(text) => {
-						this.setState({candidate1: text})
-					}}/>
-				<TextInput 
-					style={styles.textInput}
-					value={this.state.candidate2}
-					autoCorrect={false}
-					underlineColorAndroid='transparent'
-					placeholder="Candidate 2 Name"
-					onChangeText={(text) => {
-						this.setState({candidate2: text})
-					}}/>
+
+					<Picker
+						selectedValue={this.state.candidates}
+						style={styles.half}
+						onValueChange={(itemValue, itemIndex) => {
+							var tempArray = this.state.candidateArray
+							if (tempArray.length < itemValue) {
+								for (var x = 0; x < itemValue - tempArray.length; x++)
+									tempArray.push("")
+							} else if (tempArray.length > itemValue) {
+								for (var x = 0; x < tempArray.length - itemValue; x++)
+									tempArray.pop()
+							}
+							this.setState({candidates: itemValue})
+						}}>
+						<Picker.Item label="2" value="2" />
+						<Picker.Item label="3" value="3" />
+					</Picker>
+				</View>
+				{
+					this.state.candidateArray.map((data, index) => {
+						var placeholder = "Candidate " + (index + 1) + " Name"
+						return (
+							<TextInput
+								key={index}
+								style={styles.textInput}
+								value={this.state.candidateArray[index]}
+								autoCorrect={false}
+								underlineColorAndroid='transparent'
+								placeholder={placeholder}
+								onChangeText={(text) => {
+									var tempArray = this.state.candidateArray
+									tempArray[index] = text
+									this.setState({candidateArray: tempArray})
+									console.log(this.state.candidateArray)
+								}}/>
+						)
+					})
+
+				}
 				<TouchableOpacity 
 					style={styles.submitButton}
 					onPress={() => {
@@ -133,11 +173,30 @@ const styles = StyleSheet.create({
 		paddingHorizontal: 10,
 		backgroundColor: '#FFF'
 	},
+	half: {
+		height: 40,
+		width: '33%',
+		marginLeft: 7,
+		marginRight: 7,
+		marginTop: 10,
+		paddingHorizontal: 10,
+	},
+	halfText: {
+		height: 40,
+		width: '33%',
+		marginLeft: 7,
+		marginRight: 7,
+		marginTop: 10,
+		paddingHorizontal: 10,
+		alignItems: 'center',
+		justifyContent: 'center'
+	},
 	textInputHalf: {
 		height: 40,
 		width: '33%',
 		marginLeft: 7,
 		marginRight: 7,
+		marginTop: 10,
 		paddingHorizontal: 10,
 		backgroundColor: '#FFF'
 	},

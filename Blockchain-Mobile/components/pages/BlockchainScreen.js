@@ -10,13 +10,13 @@ export default class App extends React.Component {
 			voteId: "",
 			contractData: {
 				data: {
-					candidates: ["", ""]
+					candidates: ["", "", ""]
 				}
 			},
 			modalVisible: false,
 			transactions: [],
 			transactionCount: 0,
-			points: {can1: 0, can2: 0}
+			points: [0, 0, 0]
 		}
 	}
 
@@ -34,7 +34,7 @@ export default class App extends React.Component {
 				const contractData = JSON.parse(res).contracts.chain
 				const transactionList = JSON.parse(res).transactions.chain
 
-				var transactionCount = canPoint1 = canPoint2 = 0
+				var transactionCount = canPoint1 = canPoint2 = canPoint3 = 0
 				var transactions = []
 				var ending = false
 
@@ -44,10 +44,12 @@ export default class App extends React.Component {
 						for (var y = 0; y < transactionList.length; y++) {
 							if (transactionList[y].data.voteId === this.state.voteId) {
 								transactionCount++
-								if (transactionList[y].data.choice == this.state.contractData.data.candidates[0]) {
-									canPoint1++
-								} else if (transactionList[y].data.choice == this.state.contractData.data.candidates[1]) {
-									canPoint2++
+								for (var z = 0; z < contractData[x].data.candidates.length; z++) {
+									if (transactionList[y].data.choice == contractData[x].data.candidates[z]) {
+										var tempPoint = this.state.points
+										tempPoint[z]++
+										this.setState({points: tempPoint})
+									}
 								}
 								transactions.push(transactionList[y].data)
 							}
@@ -55,10 +57,6 @@ export default class App extends React.Component {
 						this.setState({
 							transactions: transactions,
 							transactionCount: transactionCount,
-							points: {
-								can1: canPoint1,
-								can2: canPoint2
-							}
 						})
 						this.toggleModal(true)
 						ending = true
@@ -92,44 +90,30 @@ export default class App extends React.Component {
 								<Icon name="chevron-left" size={40} color="black" style={{margin: 5}}/>
 						</TouchableOpacity>
 						</View>
+
+					</View>
+					<View style={styles.containerRow}>
+						{
+							this.state.contractData.data.candidates.map((data, index) => {
+								return (
+									<View 
+										key={index}
+										style={{
+											flex: this.state.points[index], 
+											height: 30, 
+											backgroundColor: '#2591f7',
+											justifyContent: 'center',
+											borderRadius: 4,
+											borderWidth: 0.5,
+											borderColor: '#d6d7da',
+										}} >
+										<Text style={styles.percText}>{data} : {this.state.points[index]}</Text>
+									</View>
+								)
+								
+							})
+						}
 						
-						{/*<View style={{alignItems: 'center', justifyContent: 'center', flex:1}}>
-							<Text style={styles.headerText}>
-								{this.state.voteId}{"\n"}Total Vote Count: {this.state.transactionCount}
-							</Text>
-						</View>
-						<View style={{alignItems: 'flex-end', justifyContent: 'center', flex:0.5}}>
-							<TouchableOpacity
-							onPress={() => { this.submitButtonTaped() }}>
-								<Icon name="cw" size={40} color="black" style={{margin: 5}}/>
-							</TouchableOpacity>
-						</View>*/}
-					</View>
-					<View style={styles.containerRow}>
-						<View style={{ alignItems: 'flex-start', flex: 1, margin: 5 }}>
-							<Text style={styles.percText}>{this.state.contractData.data.candidates[0]}</Text>
-						</View>
-						<View style={{ alignItems: 'flex-end', flex: 1, margin: 5 }}>
-							<Text style={styles.percText}>{this.state.contractData.data.candidates[1]}</Text>
-						</View>
-					</View>
-					<View style={styles.containerRow}>
-						<View 
-							style={{
-								alignItems: 'flex-start', 
-								flex: this.state.points.can1, 
-								height: 30, 
-								backgroundColor: '#2591f7'}} >
-							<Text style={styles.percText}>{Math.floor(this.state.points.can1 / (this.state.points.can2 + this.state.points.can1) * 100)}%</Text>
-						</View>
-						<View 
-							style={{
-								alignItems: 'flex-end', 
-								flex: this.state.points.can2, 
-								height: 30, 
-								backgroundColor: '#4fd0ff'}} >
-							<Text style={styles.percText}>{Math.floor(this.state.points.can2 / (this.state.points.can2 + this.state.points.can1) * 100)}%</Text>
-						</View>
 					</View>
 					<View style={styles.container}>
 							<FlatList

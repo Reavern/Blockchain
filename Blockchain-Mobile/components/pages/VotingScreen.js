@@ -155,6 +155,7 @@ export default class App extends React.Component {
 	}
 
 	render() {
+
 		return (
 			<View style={styles.container}>
 				<Modal
@@ -180,20 +181,18 @@ export default class App extends React.Component {
 						<View>
 							<Text style={styles.headerText}>Your Choice: {this.state.myChoice}</Text>
 						</View>
-						<View style={styles.containerHalf}>
-							<TouchableOpacity 
-								style={styles.voteButton}
-								onPress={() => { this.setState({myChoice: this.state.voteData.candidates[0]}) }}>
-								<Text>{this.state.voteData.candidates[0]}</Text>
-							</TouchableOpacity>
-
-							<TouchableOpacity 
-								style={styles.voteButton}
-								onPress={() => { this.setState({myChoice: this.state.voteData.candidates[1]}) }}>
-								<Text>{this.state.voteData.candidates[1]}</Text>
-							</TouchableOpacity>
-						</View>
-
+						{
+							this.state.voteData.candidates.map((data, index) => {
+								return (
+									<TouchableOpacity
+										key={index}
+										style={styles.voteButton}
+										onPress={() => { this.setState({myChoice: this.state.voteData.candidates[index]}) }}>
+										<Text>{this.state.voteData.candidates[index]}</Text>
+									</TouchableOpacity>
+								)
+							})
+						}
 						<TouchableOpacity 
 							style={styles.submitButton}
 							onPress={() => { this.showConfirmButton() }}>
@@ -257,10 +256,10 @@ const styles = StyleSheet.create({
 		justifyContent: 'center'
 	},
 	voteButton: {
-		height: 120,
-		width: 120,
+		height: 40,
+		width: '100%',
 		margin: 10,
-		backgroundColor: '#b1d8e0',
+		backgroundColor: '#17b9c1',
 		alignItems: 'center',
 		justifyContent: 'center'		
 	}
