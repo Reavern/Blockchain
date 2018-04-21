@@ -3,6 +3,8 @@ import { Modal, StyleSheet, Text, View, AsyncStorage, TextInput, TouchableOpacit
 import { Header } from 'react-navigation'
 import Icon from 'react-native-vector-icons/Entypo';
 
+const color = ['#2591f7', '#00cbff', '#00fff2', '#00ffa9']
+
 export default class App extends React.Component {
 	constructor(props) {
 		super(props);
@@ -55,7 +57,7 @@ export default class App extends React.Component {
 							}
 						}
 						this.setState({
-							transactions: transactions,
+							transactions: transactions.reverse(),
 							transactionCount: transactionCount,
 						})
 						this.toggleModal(true)
@@ -101,11 +103,8 @@ export default class App extends React.Component {
 										style={{
 											flex: this.state.points[index], 
 											height: 30, 
-											backgroundColor: '#2591f7',
+											backgroundColor: color[index],
 											justifyContent: 'center',
-											borderRadius: 4,
-											borderWidth: 0.5,
-											borderColor: '#d6d7da',
 										}} >
 										<Text style={styles.percText}>{data} : {this.state.points[index]}</Text>
 									</View>

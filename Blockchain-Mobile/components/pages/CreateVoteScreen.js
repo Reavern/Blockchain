@@ -136,7 +136,6 @@ export default class App extends React.Component {
 									var tempArray = this.state.candidateArray
 									tempArray[index] = text
 									this.setState({candidateArray: tempArray})
-									console.log(this.state.candidateArray)
 								}}/>
 						)
 					})

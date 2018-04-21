@@ -1,7 +1,7 @@
 global.keystore = "@FarellBlock:keystore_test"
 global.loggedIn = "@FarellBlock:loggedIn_test"
 global.blockchain = "@FarellBlock:1000110_TEST"
-global.IP_ADDRESS = "http://192.168.1.8:3000"
+global.IP_ADDRESS = "http://192.168.1.7:3000"
 
 var start = end = delay = 0
 
