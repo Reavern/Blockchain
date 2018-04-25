@@ -66,7 +66,7 @@ export default class App extends React.Component {
 					}
 
 				} else {
-					this.showErrorMessage('Vote ID Not Found', 'Please Enter Valid Vote ID')
+					this.showErrorMessage('Vote ID Is Not Available', 'Please Enter Valid Vote ID')
 				}
 			})
 		} else {

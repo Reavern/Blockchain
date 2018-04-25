@@ -175,8 +175,10 @@ function processPooledData() {
 
 		if (currentPoolType == "CONTRACTS") {
 			currentPoolData.index = blockchain.getContractsLength()
+			currentPoolData.prevHash = blockchain.getLatestContractsHash()
 		} else if (currentPoolType == "TRANSACTIONS") {
 			currentPoolData.index = blockchain.getTransactionsLength()
+			currentPoolData.prevHash = blockchain.getLatestTransactionsHash()
 		}
 		currentPoolData = JSON.stringify(currentPoolData)
 

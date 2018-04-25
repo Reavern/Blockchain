@@ -13,7 +13,7 @@ class Blockchain {
 		this.chain.push(genesis)
 	}
 	getBlockHash(block) {
-		const toBeHashed = block.index + block.prevHash + block.timestamp + block.data + block.sender;
+		const toBeHashed = block.timestamp + block.data + block.sender;
 		const hashedBlock = CryptoJS.SHA256(toBeHashed).toString(CryptoJS.enc.Hex);	
 		return hashedBlock;
 	}
@@ -23,7 +23,7 @@ class Blockchain {
 		return signedString
 	}
 	generateNewBlock(data, privKey) {
-		const index = this.getBlockchainLength()
+		const index = 0//this.getBlockchainLength()
 		const prevHash = this.getLatestBlock().hash
 		const timestamp = new Date().getTime()
 		const key = ec.keyFromPrivate(privKey, 'hex')
@@ -48,8 +48,6 @@ class Blockchain {
 	}
 	isNewBlockValid(newBlock) {
 		if (this.getBlockchainLength() != newBlock.index) {
-			console.log(this.getBlockchainLength())
-			console.log(newBlock.index)
 			console.log("Invalid Index !");
 			return false;
 		} else if (this.chain[(this.getBlockchainLength() - 1)].hash !== newBlock.prevHash) {
@@ -87,7 +85,9 @@ class MainChain {
 		}
 	}
 	getContractsLength() { return this.main.contracts.getBlockchainLength() }
+	getLatestContractsHash() { return this.main.contracts.getLatestBlock().hash }
 	getTransactionsLength() { return this.main.transactions.getBlockchainLength()  }
+	getLatestTransactionsHash() { return this.main.transactions.getLatestBlock().hash }
 }
 
 module.exports = MainChain
